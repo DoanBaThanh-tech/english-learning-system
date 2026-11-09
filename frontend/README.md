@@ -28,10 +28,13 @@ Khi deploy, đổi biến này sang domain API thật.
 
 | Route | Mô tả |
 |---|---|
-| `/` | Splash nền trắng-xanh, vòng tròn ripple, logo orbit, chữ SkyWord English; tự chuyển sau ~3,5 giây |
-| `/login` | Đăng nhập một thẻ căn giữa trên ảnh bầu trời; email, mật khẩu, ghi nhớ phiên |
+| `/` | Splash nền skyblue, vòng tròn ripple, logo orbit, chữ SkyWord English; tự chuyển sau ~3,5 giây |
+| `/welcome` | Trang giới thiệu: hero + 3 chức năng nổi bật; header có 2 nút Đăng nhập / Đăng ký |
+| `/login` | Đăng nhập một thẻ căn giữa trên ảnh bầu trời xanh; email, mật khẩu, ghi nhớ phiên |
 | `/register` | Tạo tài khoản: tên gọi, email, trình độ, mục tiêu ngày, mật khẩu + xác nhận |
-| `/app` | Trang chào tài khoản sau đăng nhập, hiển thị hồ sơ và số liệu dashboard |
+| `/app` | Chuyển hướng cũ về `/welcome` |
+
+Sau khi đăng nhập/đăng ký thành công, người dùng quay lại `/welcome`; header đổi sang lời chào và nút Đăng xuất.
 
 ## Auth & API
 
@@ -50,4 +53,6 @@ Database mặc định trắng: không có tài khoản demo, không nạp sẵn
 npm run build
 ```
 
-Kết quả hiện tại: build thành công, 0 lỗi TypeScript. Luồng thật đã được kiểm thử end-to-end: splash → đăng ký → trang chào → đăng xuất → sai mật khẩu bị chặn → đăng nhập lại → tự refresh token, kèm giao diện mobile 430px.
+Kết quả hiện tại: build thành công, 0 lỗi TypeScript. Luồng thật đã được kiểm thử end-to-end: splash → trang giới thiệu → đăng ký → lời chào trên header → đăng xuất → đăng nhập lại → tự refresh token.
+
+Bố cục đã được kiểm tra ở 320, 360, 390, 430, 768, 1024, 1366, 1920, 2560 và 3840px: không tràn ngang, header/2 nút luôn vừa, thẻ đăng nhập/đăng ký nằm trong màn hình và form dài có thể cuộn.

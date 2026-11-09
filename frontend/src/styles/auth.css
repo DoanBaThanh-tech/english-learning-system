@@ -25,12 +25,17 @@
   inset: 0;
   z-index: -2;
   background:
-    radial-gradient(circle at 18% 12%, rgba(255, 255, 255, 0.8), transparent 42%),
+    radial-gradient(
+      ellipse at 50% 44%,
+      rgba(255, 255, 255, 0.78) 0%,
+      rgba(255, 255, 255, 0.42) 34%,
+      transparent 64%
+    ),
     linear-gradient(
-      152deg,
-      rgba(247, 251, 255, 0.92) 0%,
-      rgba(235, 247, 255, 0.82) 44%,
-      rgba(214, 236, 255, 0.74) 100%
+      155deg,
+      rgba(214, 239, 255, 0.58) 0%,
+      rgba(160, 211, 249, 0.4) 50%,
+      rgba(204, 234, 255, 0.56) 100%
     );
 }
 
@@ -97,7 +102,15 @@
   display: flex;
   align-items: center;
   gap: 11px;
+  width: fit-content;
   margin-bottom: 26px;
+  color: inherit;
+  transition: opacity 0.2s ease;
+}
+
+.auth__brand:hover {
+  color: inherit;
+  opacity: 0.86;
 }
 
 .auth__wordmark {
@@ -396,12 +409,43 @@
   font-weight: 600;
 }
 
-.auth__footnote {
+.auth__below {
   position: relative;
   z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 9px;
   margin-top: 18px;
-  font-size: 0.71rem;
-  color: #7898ad;
+}
+
+.auth__back {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.85);
+  background: rgba(255, 255, 255, 0.62);
+  color: var(--ink-2);
+  font-size: 0.76rem;
+  font-weight: 600;
+  box-shadow: 0 12px 26px -22px rgba(14, 71, 115, 0.65);
+  backdrop-filter: blur(10px);
+  transition:
+    background 0.2s ease,
+    transform 0.2s ease;
+}
+
+.auth__back:hover {
+  background: rgba(255, 255, 255, 0.9);
+  color: var(--sky-700);
+  transform: translateY(-1px);
+}
+
+.auth__footnote {
+  font-size: 0.69rem;
+  color: #4b7695;
   text-align: center;
 }
 
@@ -452,8 +496,185 @@
   }
 
   .auth__footnote {
-    margin-top: 14px;
     font-size: 0.67rem;
+  }
+}
+
+@media (min-width: 1700px) {
+  .auth__card {
+    width: min(100%, 560px);
+    padding: 36px 42px 38px;
+    border-radius: 36px;
+  }
+
+  .auth--register .auth__card {
+    width: min(100%, 680px);
+  }
+
+  .auth__intro h1 {
+    font-size: 2.35rem;
+  }
+
+  .auth__intro p {
+    font-size: 1.04rem;
+  }
+
+  .field__control {
+    min-height: 60px;
+    padding-inline: 19px;
+  }
+
+  .field__label {
+    font-size: 0.96rem;
+  }
+
+  .field__control input,
+  .field__control select {
+    font-size: 1.06rem;
+  }
+
+  .goal-chip {
+    height: 60px;
+    font-size: 0.98rem;
+  }
+
+  .btn--primary {
+    padding: 17px 24px;
+    font-size: 1.04rem;
+  }
+}
+
+@media (min-width: 2300px) {
+  .auth__card {
+    width: min(30vw, 900px);
+    padding: 52px 60px 54px;
+    border-radius: 42px;
+  }
+
+  .auth--register .auth__card {
+    width: min(36vw, 1080px);
+  }
+
+  .auth__brand .orbit {
+    --orbit-size: 60px !important;
+  }
+
+  .auth__wordmark strong {
+    font-size: 1.55rem;
+  }
+
+  .auth__wordmark span {
+    font-size: 0.75rem;
+  }
+
+  .auth__intro h1 {
+    font-size: 3rem;
+  }
+
+  .auth__intro p {
+    font-size: 1.25rem;
+  }
+
+  .eyebrow {
+    padding: 8px 14px;
+    font-size: 0.85rem;
+  }
+
+  .field__label {
+    font-size: 1.1rem;
+  }
+
+  .field__control {
+    min-height: 76px;
+    padding-inline: 22px;
+    border-radius: 18px;
+  }
+
+  .field__control input,
+  .field__control select {
+    font-size: 1.2rem;
+  }
+
+  .goal-chip {
+    height: 76px;
+    border-radius: 17px;
+    font-size: 1.1rem;
+  }
+
+  .field__hint,
+  .form-row__note,
+  .check,
+  .check--terms {
+    font-size: 0.98rem;
+  }
+
+  .btn--primary {
+    padding: 22px 30px;
+    border-radius: 18px;
+    font-size: 1.2rem;
+  }
+
+  .auth__switch {
+    font-size: 1.05rem;
+  }
+
+  .auth__back,
+  .auth__footnote {
+    font-size: 1rem;
+  }
+}
+
+@media (min-width: 3000px) {
+  .auth__card {
+    width: min(30vw, 1000px);
+    padding: 60px 70px;
+  }
+
+  .auth--register .auth__card {
+    width: min(36vw, 1200px);
+  }
+
+  .auth__brand .orbit {
+    --orbit-size: 70px !important;
+  }
+
+  .auth__wordmark strong {
+    font-size: 1.8rem;
+  }
+
+  .auth__intro h1 {
+    font-size: 3.5rem;
+  }
+
+  .auth__intro p {
+    font-size: 1.4rem;
+  }
+
+  .field__label {
+    font-size: 1.2rem;
+  }
+
+  .field__control {
+    min-height: 84px;
+  }
+
+  .field__control input,
+  .field__control select {
+    font-size: 1.3rem;
+  }
+
+  .goal-chip {
+    height: 84px;
+    font-size: 1.2rem;
+  }
+
+  .btn--primary {
+    padding: 24px 34px;
+    font-size: 1.3rem;
+  }
+
+  .auth__switch {
+    font-size: 1.15rem;
   }
 }
 

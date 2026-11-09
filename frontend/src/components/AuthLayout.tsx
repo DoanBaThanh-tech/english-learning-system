@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react'
+import { Link } from 'react-router-dom'
 import skyBackground from '../assets/sky-background.webp'
 import { BrandOrbit } from './BrandOrbit'
 
@@ -20,17 +21,23 @@ export function AuthLayout({ variant, children }: AuthLayoutProps) {
       <div className="auth__cloud auth__cloud--two" aria-hidden="true" />
 
       <main className="auth__card">
-        <header className="auth__brand">
+        <Link to="/welcome" className="auth__brand" aria-label="Về trang giới thiệu SkyWord">
           <BrandOrbit size={44} />
           <div className="auth__wordmark">
             <strong>SkyWord</strong>
             <span>English</span>
           </div>
-        </header>
+        </Link>
         {children}
       </main>
 
-      <p className="auth__footnote">© 2026 SkyWord English · Học theo quỹ đạo của riêng bạn</p>
+      <div className="auth__below">
+        <Link to="/welcome" className="auth__back">
+          <span aria-hidden="true">←</span>
+          Về trang giới thiệu
+        </Link>
+        <p className="auth__footnote">© 2026 SkyWord English · Học theo quỹ đạo của riêng bạn</p>
+      </div>
     </div>
   )
 }

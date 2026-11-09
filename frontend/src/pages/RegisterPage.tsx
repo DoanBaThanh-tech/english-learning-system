@@ -99,7 +99,7 @@ export function RegisterPage() {
         currentLevelId: levelId,
         dailyWordGoal: goal,
       })
-      navigate('/app', { replace: true })
+      navigate('/welcome', { replace: true })
     } catch (caught) {
       setError(
         caught instanceof ApiError

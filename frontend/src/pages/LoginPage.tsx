@@ -42,7 +42,7 @@ export function LoginPage() {
     setLoading(true)
     try {
       await login(email, password, remember)
-      navigate('/app', { replace: true })
+      navigate('/welcome', { replace: true })
     } catch (caught) {
       setError(
         caught instanceof ApiError

@@ -29,13 +29,13 @@
   inset: 0;
   background:
     radial-gradient(
-      circle at 50% 40%,
-      rgba(255, 255, 255, 0.94) 0%,
-      rgba(247, 251, 255, 0.78) 32%,
-      rgba(228, 242, 255, 0.6) 60%,
-      rgba(214, 236, 255, 0.56) 100%
+      ellipse at 50% 40%,
+      rgba(255, 255, 255, 0.88) 0%,
+      rgba(250, 253, 255, 0.66) 34%,
+      rgba(214, 239, 255, 0.4) 64%,
+      rgba(160, 211, 249, 0.34) 100%
     ),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.2), rgba(207, 232, 255, 0.25));
+    linear-gradient(180deg, rgba(214, 239, 255, 0.22), rgba(160, 211, 249, 0.2));
 }
 
 .splash__cloud {
@@ -340,6 +340,145 @@
   }
   50% {
     opacity: 1;
+  }
+}
+
+@media (min-width: 1700px) {
+  .splash__stage {
+    width: min(88vw, 900px);
+  }
+
+  .splash__orbit {
+    --orbit-size: 190px !important;
+  }
+
+  .splash__title {
+    font-size: 5.5rem;
+  }
+
+  .splash__tagline {
+    max-width: 38ch;
+    font-size: 1.15rem;
+  }
+
+  .splash__progress {
+    width: 280px;
+    height: 5px;
+  }
+
+  .splash__status {
+    font-size: 0.9rem;
+  }
+
+  .splash__chip {
+    padding: 10px 17px;
+    font-size: 0.88rem;
+  }
+
+  .splash__skip {
+    padding: 13px 22px;
+    font-size: 0.95rem;
+  }
+}
+
+@media (min-width: 2300px) {
+  .splash__stage {
+    width: min(80vw, 1240px);
+  }
+
+  .splash__orbit {
+    --orbit-size: 250px !important;
+  }
+
+  .splash__halo {
+    width: min(70vw, 820px);
+  }
+
+  .splash__chip--vocab {
+    top: 15%;
+    left: 2%;
+  }
+
+  .splash__chip--speak {
+    top: 38%;
+    right: 1%;
+  }
+
+  .splash__chip--chat {
+    bottom: 30%;
+    left: 3%;
+  }
+
+  .splash__title {
+    font-size: 7rem;
+  }
+
+  .splash__title em {
+    font-size: 0.34em;
+  }
+
+  .splash__tagline {
+    font-size: 1.35rem;
+  }
+
+  .splash__progress {
+    width: 360px;
+    height: 6px;
+  }
+
+  .splash__status {
+    font-size: 1.05rem;
+  }
+
+  .splash__chip {
+    padding: 12px 20px;
+    font-size: 1rem;
+  }
+
+  .splash__skip {
+    padding: 15px 26px;
+    font-size: 1.1rem;
+  }
+}
+
+@media (min-width: 3000px) {
+  .splash__stage {
+    width: min(76vw, 1700px);
+  }
+
+  .splash__orbit {
+    --orbit-size: 320px !important;
+  }
+
+  .splash__halo {
+    width: min(64vw, 1100px);
+  }
+
+  .splash__title {
+    font-size: 8.5rem;
+  }
+
+  .splash__tagline {
+    font-size: 1.6rem;
+  }
+
+  .splash__progress {
+    width: 440px;
+    height: 7px;
+  }
+
+  .splash__status {
+    font-size: 1.2rem;
+  }
+
+  .splash__chip {
+    padding: 14px 24px;
+    font-size: 1.15rem;
+  }
+
+  .splash__skip {
+    padding: 17px 30px;
+    font-size: 1.25rem;
   }
 }
 

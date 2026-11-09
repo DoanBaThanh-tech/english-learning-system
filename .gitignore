@@ -481,10 +481,28 @@ $RECYCLE.BIN/
 # Vim temporary swap files
 *.swp
 
-# b� m?t
+# b� m?t
 .env
 .env.*
 secrets.json
 appsettings.*.local.json
 *.pfx
 node_modules/
+
+# Skyword local runtime
+backend/api.log
+backend/api.pid
+backend/smoke/
+backend/EnglishApp.Api/wwwroot/uploads/*
+!backend/EnglishApp.Api/wwwroot/uploads/**/.gitkeep
+
+# Frontend env mẫu (không chứa bí mật)
+!frontend/.env.example
+!frontend/.env.development
+
+# Local dev runtime
+frontend/dev.log
+frontend/dev.pid
+
+# Design screenshots (generated locally, not source code)
+frontend-preview/shots/

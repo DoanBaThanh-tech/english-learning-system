@@ -117,6 +117,35 @@ export function CalendarIcon({ size = 20, className }: IconProps) {
   )
 }
 
+export function LayersIcon({ size = 20, className }: IconProps) {
+  return (
+    <svg {...base(size)} className={className}>
+      <path d="m12 3.5 8.5 4.6L12 12.7 3.5 8.1 12 3.5Z" />
+      <path d="m4 12.2 8 4.3 8-4.3" />
+      <path d="m4 16.3 8 4.3 8-4.3" />
+    </svg>
+  )
+}
+
+export function BookmarkIcon({ size = 20, className }: IconProps) {
+  return (
+    <svg {...base(size)} className={className}>
+      <path d="M6.5 4.5h11a1.5 1.5 0 0 1 1.5 1.5v14l-7-4.4L5 20V6a1.5 1.5 0 0 1 1.5-1.5Z" />
+      <path d="M9 8.5h6" />
+    </svg>
+  )
+}
+
+export function MicIcon({ size = 20, className }: IconProps) {
+  return (
+    <svg {...base(size)} className={className}>
+      <rect x="9" y="3" width="6" height="11" rx="3" />
+      <path d="M5.5 11.5a6.5 6.5 0 0 0 13 0" />
+      <path d="M12 18v3M9 21h6" />
+    </svg>
+  )
+}
+
 export function LogoutIcon({ size = 18, className }: IconProps) {
   return (
     <svg {...base(size)} className={className}>
