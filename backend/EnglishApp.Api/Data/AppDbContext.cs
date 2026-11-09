@@ -144,7 +144,7 @@ public partial class AppDbContext : DbContext
 
             entity.HasIndex(e => e.Code, "UQ__Exercise__A25C5AA7C9A49C23").IsUnique();
 
-            entity.Property(e => e.Id).ValueGeneratedOnAdd();
+            entity.Property(e => e.Id).ValueGeneratedNever();
             entity.Property(e => e.Code).HasMaxLength(30);
             entity.Property(e => e.NameVi).HasMaxLength(60);
         });
@@ -250,7 +250,7 @@ public partial class AppDbContext : DbContext
 
             entity.HasIndex(e => e.Code, "UQ__PartsOfS__A25C5AA77FB09B4D").IsUnique();
 
-            entity.Property(e => e.Id).ValueGeneratedOnAdd();
+            entity.Property(e => e.Id).ValueGeneratedNever();
             entity.Property(e => e.Code).HasMaxLength(20);
             entity.Property(e => e.NameVi).HasMaxLength(50);
         });
@@ -387,7 +387,7 @@ public partial class AppDbContext : DbContext
 
             entity.HasIndex(e => e.Code, "UQ__Skills__A25C5AA7382B6D27").IsUnique();
 
-            entity.Property(e => e.Id).ValueGeneratedOnAdd();
+            entity.Property(e => e.Id).ValueGeneratedNever();
             entity.Property(e => e.Code).HasMaxLength(30);
             entity.Property(e => e.NameVi).HasMaxLength(60);
         });

@@ -1,6 +1,121 @@
-@EnglishApp.Api_HostAddress = http://localhost:5041
+@host = http://localhost:5041
 
-GET {{EnglishApp.Api_HostAddress}}/weatherforecast/
+### Health
+GET {{host}}/health
 Accept: application/json
 
-###
+### Đăng nhập tài khoản demo
+# @name login
+POST {{host}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "demo@skyword.dev",
+  "password": "Demo@12345"
+}
+
+### Gán access token từ response login
+@token = {{login.response.body.accessToken}}
+
+### Dashboard
+GET {{host}}/api/users/me/dashboard
+Authorization: Bearer {{token}}
+
+### Tra từ
+GET {{host}}/api/dictionary/words/run
+Authorization: Bearer {{token}}
+
+### Chọn nghĩa theo ngữ cảnh
+POST {{host}}/api/dictionary/context-lookup
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "word": "runs",
+  "sentence": "She runs a small café in District 1.",
+  "translateSentence": true
+}
+
+### Dịch câu
+POST {{host}}/api/dictionary/translate
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "text": "She runs a small café in District 1.",
+  "from": "en",
+  "to": "vi"
+}
+
+### Sổ từ vựng
+GET {{host}}/api/vocabulary/words?page=1&pageSize=20
+Authorization: Bearer {{token}}
+
+### Từ đến hạn
+GET {{host}}/api/vocabulary/words/due?limit=20
+Authorization: Bearer {{token}}
+
+### Bắt đầu phiên ôn
+# @name study
+POST {{host}}/api/study/sessions
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "mode": "review",
+  "limit": 20
+}
+
+### Thẻ tiếp theo
+GET {{host}}/api/study/sessions/{{study.response.body.id}}/next?type=multiple_choice
+Authorization: Bearer {{token}}
+
+### Thống kê tổng quan
+GET {{host}}/api/stats/overview
+Authorization: Bearer {{token}}
+
+### Chấm phát âm (transcript từ Web Speech API)
+POST {{host}}/api/pronunciation/analyze
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "wordId": 1,
+  "referenceText": "She runs a small café in District 1.",
+  "transcript": "She run a small cafe in District one"
+}
+
+### Chat: tạo phiên
+# @name chat
+POST {{host}}/api/chat/sessions
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "scenarioId": 1,
+  "title": "Luyện gọi cà phê"
+}
+
+### Chat: gửi tin nhắn
+POST {{host}}/api/chat/sessions/{{chat.response.body.id}}/messages
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "content": "I very like coffee. I want a coffee with milk please."
+}
+
+### Bài đọc
+GET {{host}}/api/reading/passages
+Authorization: Bearer {{token}}
+
+### Sinh lộ trình 14 ngày
+POST {{host}}/api/plans/generate
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "days": 14,
+  "minutesPerDay": 20,
+  "focusSkill": "speaking"
+}
