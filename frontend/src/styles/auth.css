@@ -253,6 +253,22 @@
   margin-top: 1px;
 }
 
+.form-alert--success {
+  border-color: rgba(37, 161, 134, 0.26);
+  background: rgba(236, 251, 246, 0.94);
+  color: #157966;
+  animation: fadeUp 0.4s var(--ease-out) both;
+}
+
+.form-alert--success svg {
+  color: var(--success);
+}
+
+.form-alert--success strong {
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
 .form-row {
   display: flex;
   align-items: center;

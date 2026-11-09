@@ -1,5 +1,5 @@
 import { useState, type FormEvent, type KeyboardEvent } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { AuthLayout } from '../components/AuthLayout'
 import {
   ArrowRightIcon,
@@ -14,10 +14,20 @@ import '../styles/auth.css'
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
+type LoginLocationState = {
+  email?: string
+  justRegistered?: boolean
+  from?: string
+}
+
 export function LoginPage() {
   const navigate = useNavigate()
+  const location = useLocation()
   const { login } = useAuth()
-  const [email, setEmail] = useState('')
+  const state = (location.state ?? null) as LoginLocationState | null
+  const prefilledEmail = state?.email?.trim().toLowerCase() ?? ''
+  const justRegistered = Boolean(state?.justRegistered && prefilledEmail)
+  const [email, setEmail] = useState(prefilledEmail)
   const [password, setPassword] = useState('')
   const [remember, setRemember] = useState(true)
   const [capsLock, setCapsLock] = useState(false)
@@ -42,7 +52,8 @@ export function LoginPage() {
     setLoading(true)
     try {
       await login(email, password, remember)
-      navigate('/welcome', { replace: true })
+      const target = state?.from && state.from !== '/login' ? state.from : '/app'
+      navigate(target, { replace: true })
     } catch (caught) {
       setError(
         caught instanceof ApiError
@@ -63,13 +74,27 @@ export function LoginPage() {
       <div className="auth__intro">
         <span className="eyebrow">
           <span className="eyebrow__dot" />
-          Chào mừng trở lại
+          {justRegistered ? 'Tài khoản đã sẵn sàng' : 'Chào mừng trở lại'}
         </span>
-        <h1>Đăng nhập để tiếp tục</h1>
-        <p>Bầu trời từ vựng của bạn vẫn đang ở đây, chờ bạn quay lại.</p>
+        <h1>{justRegistered ? 'Đăng nhập để vào trang chủ' : 'Đăng nhập để tiếp tục'}</h1>
+        <p>
+          {justRegistered
+            ? 'Email của bạn đã được điền sẵn. Chỉ cần nhập mật khẩu là bước vào trang chủ.'
+            : 'Bầu trời từ vựng của bạn vẫn đang ở đây, chờ bạn quay lại.'}
+        </p>
       </div>
 
       <form className="auth-form" onSubmit={handleSubmit} noValidate>
+        {justRegistered && !error ? (
+          <div className="form-alert form-alert--success" role="status">
+            <CheckIcon size={17} />
+            <span>
+              Tài khoản <strong>{prefilledEmail}</strong> đã được tạo thành công.
+              Nhập mật khẩu để đăng nhập.
+            </span>
+          </div>
+        ) : null}
+
         {error ? (
           <div className="form-alert" role="alert">
             <SparkIcon size={17} />
@@ -90,7 +115,7 @@ export function LoginPage() {
               placeholder="ban@skyword.vn"
               autoComplete="email"
               inputMode="email"
-              autoFocus
+              autoFocus={!prefilledEmail}
               disabled={loading}
               aria-invalid={Boolean(fieldErrors.email)}
             />
@@ -105,6 +130,7 @@ export function LoginPage() {
           onChange={setPassword}
           placeholder="Nhập mật khẩu của bạn"
           autoComplete="current-password"
+          autoFocus={Boolean(prefilledEmail)}
           invalid={Boolean(fieldErrors.password)}
           hint={
             fieldErrors.password ??

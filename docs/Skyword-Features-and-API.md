@@ -438,7 +438,7 @@ Script kiểm tra auth, refresh xoay vòng, từ điển, enrich từ lạ, ch�
 
 ### 7.7 Người dùng đầu tiên
 
-Không còn tài khoản demo. Mở `http://localhost:5173`, bấm **Tạo tài khoản mới**, điền tên gọi, email, trình độ, mục tiêu ngày và mật khẩu. Tài khoản này được ghi vào DB thật với Id bắt đầu từ 1; sau đó đăng nhập lại bằng chính email/mật khẩu vừa tạo.
+Không còn tài khoản demo. Mở `http://localhost:5173`, bấm **Tạo tài khoản mới**, điền tên gọi, email, trình độ, mục tiêu ngày và mật khẩu. Tài khoản được ghi vào DB thật với Id bắt đầu từ 1; hệ thống chuyển sang trang đăng nhập, **điền sẵn email vừa đăng ký** và đặt con trỏ ở ô mật khẩu. Người dùng chỉ cần nhập mật khẩu để vào thẳng trang chủ `/app`.
 
 ---
 
@@ -468,13 +468,14 @@ Menu không phải danh sách dọc. Nó là **bản đồ chức năng**: 16 v�
 Đã hoàn thành trong project `frontend/` (Vite + React 19 + TypeScript):
 
 1. **Splash**: nền skyblue, vòng tròn ripple từ tâm, logo orbit, chữ SkyWord English, thanh tiến trình; tự chuyển sau ~3,5 giây, có nút bỏ qua.
-2. **Trang giới thiệu (Welcome)**: hero giới thiệu sản phẩm và đúng 3 chức năng nổi bật (ngữ cảnh, sổ từ SRS, luyện nói). Header có 2 nút **Đăng nhập** / **Đăng ký**; khi đã đăng nhập hiển thị lời chào và nút đăng xuất.
+2. **Trang giới thiệu (Welcome)**: hero giới thiệu sản phẩm và đúng 3 chức năng nổi bật (ngữ cảnh, sổ từ SRS, luyện nói). Khách thấy 2 nút **Đăng nhập** / **Đăng ký**; người đã đăng nhập thấy lời chào, nút **Trang chủ** và **Đăng xuất**.
 3. **Đăng nhập**: một thẻ kính mờ căn giữa trên ảnh bầu trời xanh; email, mật khẩu (hiện/ẩn), caps-lock warning, ghi nhớ đăng nhập, lỗi inline, loading state, link về trang giới thiệu.
-4. **Đăng ký**: tên gọi, email, trình độ A1–C2, mục tiêu 10/20/30/50 từ/ngày, mật khẩu + xác nhận + thanh độ mạnh, điều khoản; validate hai chiều với API.
-5. **Auth client**: login/register, lưu phiên theo “ghi nhớ”, tự động refresh access token khi gặp 401, chống gọi refresh trùng, xử lý lỗi ProblemDetails.
-6. **Responsive**: đã kiểm tra 320, 360, 390, 430, 768, 1024, 1366, 1920, 2560 và 3840px; không tràn ngang, form cuộn được, TV dùng thẻ và chữ lớn hơn.
+4. **Đăng ký**: tên gọi, email, trình độ A1–C2, mục tiêu 10/20/30/50 từ/ngày, mật khẩu + xác nhận + thanh độ mạnh, điều khoản; validate hai chiều với API. Tạo xong chuyển sang đăng nhập với email điền sẵn và thông báo thành công màu xanh.
+5. **Trang chủ `/app`** (yêu cầu đăng nhập): lời chào theo buổi, ngày hiện tại, trình độ, mục tiêu ngày, vòng tiến độ từ đã học, 4 thẻ thống kê (tổng từ, đã thuộc, cần ôn, chuỗi ngày), biểu đồ 7 ngày, điểm 5 kỹ năng, việc kế tiếp của lộ trình và trạng thái sổ từ trống. Dữ liệu lấy từ `GET /api/users/me/dashboard`.
+6. **Auth client**: login/register, lưu phiên theo “ghi nhớ”, tự động refresh access token khi gặp 401, chống gọi refresh trùng, xử lý lỗi ProblemDetails. Đăng ký không tự lưu phiên; token vừa phát được thu hồi để người dùng chủ động đăng nhập lại.
+7. **Responsive**: đã kiểm tra 320, 360, 390, 430, 768, 1024, 1366, 1920, 2560 và 3840px; không tràn ngang, header luôn vừa màn hình, form cuộn được, TV dùng thẻ và chữ lớn hơn.
 
-Bước tiếp theo: app shell (topbar + orbit menu + command palette), dashboard đầy đủ, từ điển theo ngữ cảnh, sổ từ/SRS, phát âm, chat, bài đọc, lộ trình. Gợi ý state: React Query cho server state, Context/Zustand cho UI state; giữ CSS token xanh-trắng hiện tại.
+Bước tiếp theo: từ điển theo ngữ cảnh, sổ từ/SRS, phát âm, chat, bài đọc và lộ trình được nối vào trang chủ. Gợi ý state: React Query cho server state, Context/Zustand cho UI state; giữ CSS token xanh-trắng hiện tại.
 
 ---
 
@@ -502,4 +503,4 @@ Bước tiếp theo: app shell (topbar + orbit menu + command palette), dashboar
 | Ảnh Splash/Welcome/Login/Register (responsive) | `frontend-preview/shots/v3/` |
 | Tài liệu này | `docs/Skyword-Features-and-API.md` |
 
-API build 0 warning/0 error; 98/98 kiểm thử end-to-end đạt trên SQL Server thật khi bật seed QA. Database bàn giao hiện tại trắng (0 user, 0 từ) để người dùng tự đăng ký tài khoản đầu tiên.
+API build 0 warning/0 error; 98/98 kiểm thử end-to-end đạt trên SQL Server thật khi bật seed QA. Database bàn giao không có user mẫu hay từ vựng nạp sẵn; tài khoản đang có là do người dùng tự đăng ký. Tài khoản test dùng khi kiểm thử giao diện đã được xóa sạch.

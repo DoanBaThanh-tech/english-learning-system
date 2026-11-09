@@ -748,6 +748,12 @@
   }
 }
 
+@media (max-width: 430px) {
+  .site-user {
+    display: none;
+  }
+}
+
 @media (max-width: 380px) {
   .site-brand .orbit {
     --orbit-size: 34px !important;
@@ -772,6 +778,29 @@
 
   .hero__actions .btn {
     flex: 1 1 100%;
+  }
+}
+
+@media (max-width: 340px) {
+  .site-header__inner {
+    gap: 6px;
+  }
+
+  .site-brand {
+    gap: 6px;
+  }
+
+  .site-brand__word strong {
+    font-size: 0.92rem;
+  }
+
+  .site-actions {
+    gap: 5px;
+  }
+
+  .btn--compact {
+    padding: 8px 10px;
+    font-size: 0.72rem;
   }
 }
 

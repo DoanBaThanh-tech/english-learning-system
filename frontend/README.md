@@ -32,9 +32,9 @@ Khi deploy, đổi biến này sang domain API thật.
 | `/welcome` | Trang giới thiệu: hero + 3 chức năng nổi bật; header có 2 nút Đăng nhập / Đăng ký |
 | `/login` | Đăng nhập một thẻ căn giữa trên ảnh bầu trời xanh; email, mật khẩu, ghi nhớ phiên |
 | `/register` | Tạo tài khoản: tên gọi, email, trình độ, mục tiêu ngày, mật khẩu + xác nhận |
-| `/app` | Chuyển hướng cũ về `/welcome` |
+| `/app` | Trang chủ sau đăng nhập: lời chào, mục tiêu ngày, chuỗi ngày, thống kê, hoạt động 7 ngày và điểm kỹ năng |
 
-Sau khi đăng nhập/đăng ký thành công, người dùng quay lại `/welcome`; header đổi sang lời chào và nút Đăng xuất.
+Đăng ký thành công sẽ chuyển sang `/login` với email vừa đăng ký được điền sẵn và con trỏ nằm ở ô mật khẩu; người dùng chỉ cần nhập mật khẩu. Đăng nhập thành công vào thẳng `/app`. Người đã có phiên mở `/login`, `/register` sẽ được đưa về `/app`; khách mở `/app` sẽ được đưa về `/login`.
 
 ## Auth & API
 
@@ -53,6 +53,6 @@ Database mặc định trắng: không có tài khoản demo, không nạp sẵn
 npm run build
 ```
 
-Kết quả hiện tại: build thành công, 0 lỗi TypeScript. Luồng thật đã được kiểm thử end-to-end: splash → trang giới thiệu → đăng ký → lời chào trên header → đăng xuất → đăng nhập lại → tự refresh token.
+Kết quả hiện tại: build thành công, 0 lỗi TypeScript. Luồng thật đã được kiểm thử end-to-end: splash → trang giới thiệu → đăng ký → trang đăng nhập điền sẵn email → nhập mật khẩu → trang chủ → đăng xuất → đăng nhập lại → tự refresh token.
 
 Bố cục đã được kiểm tra ở 320, 360, 390, 430, 768, 1024, 1366, 1920, 2560 và 3840px: không tràn ngang, header/2 nút luôn vừa, thẻ đăng nhập/đăng ký nằm trong màn hình và form dài có thể cuộn.

@@ -12,6 +12,7 @@ type PasswordFieldProps = {
   invalid?: boolean
   disabled?: boolean
   maxLength?: number
+  autoFocus?: boolean
   onKeyUp?: (event: KeyboardEvent<HTMLInputElement>) => void
 }
 
@@ -26,6 +27,7 @@ export function PasswordField({
   invalid = false,
   disabled = false,
   maxLength,
+  autoFocus = false,
   onKeyUp,
 }: PasswordFieldProps) {
   const [visible, setVisible] = useState(false)
@@ -45,6 +47,7 @@ export function PasswordField({
           maxLength={maxLength}
           placeholder={placeholder}
           autoComplete={autoComplete}
+          autoFocus={autoFocus}
           disabled={disabled}
           aria-invalid={invalid}
         />

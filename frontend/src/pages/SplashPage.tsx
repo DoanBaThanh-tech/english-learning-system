@@ -3,10 +3,12 @@ import { useNavigate } from 'react-router-dom'
 import skyBackground from '../assets/sky-background.webp'
 import { BrandOrbit } from '../components/BrandOrbit'
 import { ArrowRightIcon, SparkIcon } from '../components/Icons'
+import { useAuth } from '../lib/AuthContext'
 import '../styles/splash.css'
 
 export function SplashPage() {
   const navigate = useNavigate()
+  const { user } = useAuth()
   const [leaving, setLeaving] = useState(false)
   const leftRef = useRef(false)
 
@@ -17,11 +19,11 @@ export function SplashPage() {
       window.setTimeout(() => {
         setLeaving(true)
         window.setTimeout(() => {
-          navigate('/welcome', { replace: true })
+          navigate(user ? '/app' : '/welcome', { replace: true })
         }, delay)
       }, 0)
     },
-    [navigate],
+    [navigate, user],
   )
 
   useEffect(() => {

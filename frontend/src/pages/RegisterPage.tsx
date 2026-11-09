@@ -115,15 +115,20 @@ export function RegisterPage() {
     if (!validate() || loading) return
 
     setLoading(true)
+    const normalizedEmail = email.trim().toLowerCase()
     try {
       await register({
         displayName,
-        email,
+        email: normalizedEmail,
         password,
         currentLevelId: levelId,
         dailyWordGoal: goal,
       })
-      navigate('/welcome', { replace: true })
+      // Tạo xong tài khoản thì chuyển sang đăng nhập, điền sẵn email vừa đăng ký.
+      navigate('/login', {
+        replace: true,
+        state: { email: normalizedEmail, justRegistered: true },
+      })
     } catch (caught) {
       setError(
         caught instanceof ApiError
@@ -327,7 +332,8 @@ export function RegisterPage() {
         </button>
 
         <p className="form-note">
-          Thông tin của bạn được lưu riêng tư và chỉ dùng cho việc học của bạn.
+          Sau khi tạo tài khoản, bạn sẽ được chuyển tới trang đăng nhập với email
+          điền sẵn. Thông tin của bạn được lưu riêng tư và chỉ dùng cho việc học.
         </p>
       </form>
 

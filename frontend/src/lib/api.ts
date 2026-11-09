@@ -22,6 +22,31 @@ export type TokenResponse = {
   user: UserProfile
 }
 
+export type DailyStat = {
+  date: string
+  wordsLearned: number
+  wordsReviewed: number
+  minutesStudied: number
+  goalMet: boolean
+}
+
+export type SkillScore = {
+  skillId: number
+  code: string
+  nameVi: string
+  score: number
+  measuredAt: string
+}
+
+export type ActivePlanTask = {
+  planId: number
+  taskId: number
+  title: string
+  dueDate: string
+  skillCode: string
+  skillNameVi: string
+}
+
 export type Dashboard = {
   user: UserProfile
   streakDays: number
@@ -35,6 +60,9 @@ export type Dashboard = {
   dueCount: number
   totalWords: number
   masteredWords: number
+  weekly: DailyStat[]
+  skills: SkillScore[]
+  nextTask: ActivePlanTask | null
 }
 
 export type RegisterInput = {

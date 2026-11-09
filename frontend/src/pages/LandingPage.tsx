@@ -81,6 +81,9 @@ export function LandingPage() {
                     Xin chào, <strong>{user.displayName}</strong>
                   </span>
                 </span>
+                <Link to="/app" className="btn btn--primary btn--compact">
+                  Trang chủ
+                </Link>
                 <button type="button" className="btn btn--ghost btn--compact" onClick={handleLogout}>
                   <LogoutIcon size={17} />
                   Đăng xuất
@@ -117,10 +120,10 @@ export function LandingPage() {
 
             <div className="hero__actions">
               {user ? (
-                <a href="#features" className="btn btn--primary btn--hero">
-                  Khám phá chức năng
+                <Link to="/app" className="btn btn--primary btn--hero">
+                  Vào trang chủ
                   <ArrowRightIcon size={19} />
-                </a>
+                </Link>
               ) : (
                 <>
                   <Link to="/register" className="btn btn--primary btn--hero">
@@ -202,16 +205,18 @@ export function LandingPage() {
                   <span className="cta__eyebrow">Tài khoản đã sẵn sàng</span>
                   <h2>Chào {user.displayName}, bầu trời đang chờ bạn.</h2>
                   <p>
-                    Giao diện học tập đầy đủ sẽ được nối vào tài khoản này ở bước tiếp theo.
+                    Mục tiêu hôm nay, chuỗi ngày và tiến độ học tập đang ở trong
+                    trang chủ của bạn.
                   </p>
                 </div>
                 <div className="cta__actions">
+                  <Link to="/app" className="btn btn--primary btn--hero">
+                    Vào trang chủ
+                    <ArrowRightIcon size={19} />
+                  </Link>
                   <a href="#features" className="btn btn--ghost btn--hero">
                     Xem lại chức năng
                   </a>
-                  <button type="button" className="btn btn--primary btn--hero" onClick={handleLogout}>
-                    Đăng xuất
-                  </button>
                 </div>
               </>
             ) : (

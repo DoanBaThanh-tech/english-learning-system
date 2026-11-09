@@ -104,10 +104,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       email: input.email.trim().toLowerCase(),
       displayName: input.displayName.trim(),
     })
-    const next = toSession(response)
-    saveSession(next, true)
-    setSession(next)
-    return next.user
+
+    // Đăng ký không tự đăng nhập: thu hồi token vừa phát để người dùng chủ động
+    // đăng nhập lại bằng email đã đăng ký. Token vẫn tự hết hạn nếu thu hồi lỗi.
+    try {
+      await logoutRequest(response.accessToken, response.refreshToken)
+    } catch {
+      // Không chặn việc tạo tài khoản chỉ vì bước dọn token thất bại.
+    }
+
+    return response.user
   }, [])
 
   const refresh = useCallback(async () => {

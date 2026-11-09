@@ -1,6 +1,7 @@
 import { useEffect, type ReactNode } from 'react'
 import { Navigate, Route, Routes, useLocation } from 'react-router-dom'
 import { AuthProvider, useAuth } from './lib/AuthContext'
+import { HomePage } from './pages/HomePage'
 import { LandingPage } from './pages/LandingPage'
 import { LoginPage } from './pages/LoginPage'
 import { RegisterPage } from './pages/RegisterPage'
@@ -16,7 +17,27 @@ function ScrollToTop() {
 
 function GuestOnly({ children }: { children: ReactNode }) {
   const { user } = useAuth()
-  return user ? <Navigate to="/welcome" replace /> : <>{children}</>
+  return user ? <Navigate to="/app" replace /> : <>{children}</>
+}
+
+function RequireAuth({ children }: { children: ReactNode }) {
+  const { user } = useAuth()
+  const location = useLocation()
+  if (!user) {
+    return (
+      <Navigate
+        to="/login"
+        replace
+        state={{ from: location.pathname }}
+      />
+    )
+  }
+  return <>{children}</>
+}
+
+function Fallback() {
+  const { user } = useAuth()
+  return <Navigate to={user ? '/app' : '/welcome'} replace />
 }
 
 export default function App() {
@@ -42,8 +63,15 @@ export default function App() {
             </GuestOnly>
           }
         />
-        <Route path="/app" element={<Navigate to="/welcome" replace />} />
-        <Route path="*" element={<Navigate to="/welcome" replace />} />
+        <Route
+          path="/app"
+          element={
+            <RequireAuth>
+              <HomePage />
+            </RequireAuth>
+          }
+        />
+        <Route path="*" element={<Fallback />} />
       </Routes>
     </AuthProvider>
   )
