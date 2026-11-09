@@ -16,6 +16,10 @@ import { useAuth } from '../lib/AuthContext'
 import '../styles/auth.css'
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+const NAME_PATTERN = /^[\p{L}\p{M}]+(?: [\p{L}\p{M}]+)*$/u
+const SPECIAL_CHAR_PATTERN = /[^A-Za-z0-9\s]/
+const MAX_NAME_LENGTH = 30
+const MAX_PASSWORD_LENGTH = 20
 
 const LEVELS = [
   { id: 1, code: 'A1', label: 'Sơ cấp' },
@@ -67,22 +71,42 @@ export function RegisterPage() {
 
   function validate(): boolean {
     const next: FieldErrors = {}
-    if (!displayName.trim()) next.displayName = 'Bạn cho SkyWord biết tên gọi nhé.'
-    else if (displayName.trim().length < 2) next.displayName = 'Tên gọi cần ít nhất 2 ký tự.'
+    const name = displayName.trim()
+
+    if (!name) next.displayName = 'Bạn cho SkyWord biết tên gọi nhé.'
+    else if (name.length < 2) next.displayName = 'Tên gọi cần ít nhất 2 ký tự.'
+    else if (name.length > MAX_NAME_LENGTH) {
+      next.displayName = `Tên gọi tối đa ${MAX_NAME_LENGTH} ký tự.`
+    } else if (!NAME_PATTERN.test(name)) {
+      next.displayName = 'Tên gọi chỉ được chứa chữ cái và khoảng trắng, không có số hoặc ký tự đặc biệt.'
+    }
 
     if (!email.trim()) next.email = 'Email là thông tin bắt buộc.'
     else if (!EMAIL_PATTERN.test(email.trim())) next.email = 'Email chưa đúng định dạng.'
 
     if (!password) next.password = 'Bạn tạo một mật khẩu nhé.'
     else if (password.length < 8) next.password = 'Mật khẩu cần ít nhất 8 ký tự.'
+    else if (password.length > MAX_PASSWORD_LENGTH) {
+      next.password = `Mật khẩu tối đa ${MAX_PASSWORD_LENGTH} ký tự.`
+    } else if (!SPECIAL_CHAR_PATTERN.test(password)) {
+      next.password = 'Mật khẩu cần ít nhất 1 ký tự đặc biệt, ví dụ @, #, !.'
+    }
 
     if (!confirm) next.confirm = 'Bạn nhập lại mật khẩu để xác nhận.'
-    else if (confirm !== password) next.confirm = 'Hai mật khẩu chưa khớp nhau.'
+    else if (confirm.length > MAX_PASSWORD_LENGTH) {
+      next.confirm = `Mật khẩu nhập lại tối đa ${MAX_PASSWORD_LENGTH} ký tự.`
+    } else if (confirm !== password) next.confirm = 'Hai mật khẩu chưa khớp nhau.'
 
     if (!terms) next.terms = 'Bạn cần đồng ý điều khoản để tạo tài khoản.'
 
     setFieldErrors(next)
     return Object.keys(next).length === 0
+  }
+
+  function handleNameChange(value: string) {
+    // Chỉ giữ chữ cái (kể cả tiếng Việt) và khoảng trắng, gộp khoảng trắng liên tiếp.
+    const cleaned = value.replace(/[^\p{L}\p{M}\s]/gu, '').replace(/\s+/g, ' ')
+    setDisplayName(cleaned.slice(0, MAX_NAME_LENGTH))
   }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -139,18 +163,18 @@ export function RegisterPage() {
               name="displayName"
               type="text"
               value={displayName}
-              onChange={(event) => setDisplayName(event.target.value)}
+              onChange={(event) => handleNameChange(event.target.value)}
               placeholder="Ví dụ: Minh Anh"
               autoComplete="nickname"
-              maxLength={100}
+              maxLength={MAX_NAME_LENGTH}
               autoFocus
               disabled={loading}
               aria-invalid={Boolean(fieldErrors.displayName)}
             />
           </span>
-          {fieldErrors.displayName ? (
-            <span className="field__hint is-error">{fieldErrors.displayName}</span>
-          ) : null}
+          <span className={`field__hint${fieldErrors.displayName ? ' is-error' : ''}`}>
+            {fieldErrors.displayName ?? 'Chỉ chữ cái và khoảng trắng, tối đa 30 ký tự.'}
+          </span>
         </label>
 
         <label className="field" htmlFor="register-email">
@@ -226,10 +250,14 @@ export function RegisterPage() {
           label="Mật khẩu"
           value={password}
           onChange={setPassword}
-          placeholder="Ít nhất 8 ký tự"
+          placeholder="8–20 ký tự, có ký tự đặc biệt"
           autoComplete="new-password"
           invalid={Boolean(fieldErrors.password)}
-          hint={fieldErrors.password}
+          hint={
+            fieldErrors.password ??
+            'Từ 8 đến 20 ký tự, gồm ít nhất 1 ký tự đặc biệt (ví dụ @, #, !).'
+          }
+          maxLength={MAX_PASSWORD_LENGTH}
           disabled={loading}
         />
 
@@ -255,8 +283,11 @@ export function RegisterPage() {
           invalid={Boolean(fieldErrors.confirm)}
           hint={
             fieldErrors.confirm ??
-            (confirm && confirm === password ? 'Hai mật khẩu đã khớp.' : undefined)
+            (confirm && confirm === password
+              ? 'Hai mật khẩu đã khớp.'
+              : 'Tối đa 20 ký tự, giống mật khẩu phía trên.')
           }
+          maxLength={MAX_PASSWORD_LENGTH}
           disabled={loading}
         />
 

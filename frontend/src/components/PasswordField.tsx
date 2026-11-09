@@ -11,6 +11,7 @@ type PasswordFieldProps = {
   hint?: string
   invalid?: boolean
   disabled?: boolean
+  maxLength?: number
   onKeyUp?: (event: KeyboardEvent<HTMLInputElement>) => void
 }
 
@@ -24,6 +25,7 @@ export function PasswordField({
   hint,
   invalid = false,
   disabled = false,
+  maxLength,
   onKeyUp,
 }: PasswordFieldProps) {
   const [visible, setVisible] = useState(false)
@@ -40,6 +42,7 @@ export function PasswordField({
           value={value}
           onChange={(event: ChangeEvent<HTMLInputElement>) => onChange(event.target.value)}
           onKeyUp={onKeyUp}
+          maxLength={maxLength}
           placeholder={placeholder}
           autoComplete={autoComplete}
           disabled={disabled}
@@ -55,7 +58,9 @@ export function PasswordField({
           {visible ? <EyeOffIcon size={19} /> : <EyeIcon size={19} />}
         </button>
       </span>
-      {hint ? <span className="field__hint">{hint}</span> : null}
+      {hint ? (
+        <span className={`field__hint${invalid ? ' is-error' : ''}`}>{hint}</span>
+      ) : null}
     </label>
   )
 }
