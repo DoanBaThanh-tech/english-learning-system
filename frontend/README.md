@@ -32,7 +32,7 @@ Khi deploy, đổi biến này sang domain API thật.
 | `/welcome` | Trang giới thiệu: hero + 3 chức năng nổi bật; header có 2 nút Đăng nhập / Đăng ký |
 | `/login` | Đăng nhập một thẻ căn giữa trên ảnh bầu trời xanh; email, mật khẩu, ghi nhớ phiên |
 | `/register` | Tạo tài khoản: tên gọi, email, trình độ, mục tiêu ngày, mật khẩu + xác nhận |
-| `/app` | Trang chủ sau đăng nhập: lời chào, mục tiêu ngày, chuỗi ngày, thống kê, hoạt động 7 ngày và điểm kỹ năng |
+| `/app` | Trang chủ sau đăng nhập: lời chào, mục tiêu ngày, chuỗi ngày, thống kê, hoạt động 7 ngày và điểm kỹ năng; nút 3 gạch cạnh logo mở menu vòng tròn 8 chức năng |
 
 Đăng ký thành công sẽ chuyển sang `/login` với email vừa đăng ký được điền sẵn và con trỏ nằm ở ô mật khẩu; người dùng chỉ cần nhập mật khẩu. Đăng nhập thành công vào thẳng `/app`. Người đã có phiên mở `/login`, `/register` sẽ được đưa về `/app`; khách mở `/app` sẽ được đưa về `/login`.
 

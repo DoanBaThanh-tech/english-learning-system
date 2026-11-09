@@ -146,6 +146,44 @@ export function MicIcon({ size = 20, className }: IconProps) {
   )
 }
 
+export function ChatIcon({ size = 20, className }: IconProps) {
+  return (
+    <svg {...base(size)} className={className}>
+      <path d="M20 11.5a6.5 6.5 0 0 1-6.5 6.5H9.2L5 21v-4.1A6.5 6.5 0 0 1 7 4.9h6.5A6.5 6.5 0 0 1 20 11.5Z" />
+      <path d="M8.5 10.2h7M8.5 13.2h4.5" />
+    </svg>
+  )
+}
+
+export function BookIcon({ size = 20, className }: IconProps) {
+  return (
+    <svg {...base(size)} className={className}>
+      <path d="M4.5 5.5c2.9-1 5.4-.4 7.5 1v13c-2.1-1.4-4.6-2-7.5-1v-13Z" />
+      <path d="M19.5 5.5c-2.9-1-5.4-.4-7.5 1v13c2.1-1.4 4.6-2 7.5-1v-13Z" />
+      <path d="M7.5 9.2c.9-.1 1.7 0 2.5.4M7.5 12.4c.9-.1 1.7 0 2.5.4" />
+    </svg>
+  )
+}
+
+export function ChartIcon({ size = 20, className }: IconProps) {
+  return (
+    <svg {...base(size)} className={className}>
+      <path d="M4 20h16" />
+      <rect x="5.5" y="12" width="3.2" height="5.5" rx="1.1" />
+      <rect x="10.4" y="8" width="3.2" height="9.5" rx="1.1" />
+      <rect x="15.3" y="4.5" width="3.2" height="13" rx="1.1" />
+    </svg>
+  )
+}
+
+export function CloseIcon({ size = 20, className }: IconProps) {
+  return (
+    <svg {...base(size)} className={className} strokeWidth={2}>
+      <path d="m6 6 12 12M18 6 6 18" />
+    </svg>
+  )
+}
+
 export function LogoutIcon({ size = 18, className }: IconProps) {
   return (
     <svg {...base(size)} className={className}>

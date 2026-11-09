@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import skyBackground from '../assets/sky-background.webp'
 import { BrandOrbit } from '../components/BrandOrbit'
+import { OrbitMenu } from '../components/OrbitMenu'
 import {
   BookmarkIcon,
   CalendarIcon,
@@ -74,6 +75,7 @@ export function HomePage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [leaving, setLeaving] = useState(false)
+  const [menuOpen, setMenuOpen] = useState(false)
 
   const accessToken = session?.accessToken
   const accountEmail = user?.email
@@ -209,22 +211,29 @@ export function HomePage() {
 
       <header className="site-header">
         <div className="site-shell site-header__inner">
-          <Link to="/app" className="site-brand" aria-label="SkyWord English - trang chủ">
-            <BrandOrbit size={42} />
-            <span className="site-brand__word">
-              <strong>SkyWord</strong>
-              <em>English</em>
-            </span>
-          </Link>
+          <div className="home-brand-group">
+            <Link to="/app" className="site-brand" aria-label="SkyWord English - trang chủ">
+              <BrandOrbit size={42} />
+              <span className="site-brand__word">
+                <strong>SkyWord</strong>
+                <em>English</em>
+              </span>
+            </Link>
 
-          <nav className="home-nav" aria-label="Điều hướng chính">
-            <Link to="/app" className="home-nav__link is-active" aria-current="page">
-              Trang chủ
-            </Link>
-            <Link to="/welcome" className="home-nav__link">
-              Giới thiệu
-            </Link>
-          </nav>
+            <button
+              type="button"
+              className="menu-toggle"
+              onClick={() => setMenuOpen(true)}
+              aria-label="Mở menu chức năng"
+              aria-haspopup="dialog"
+              aria-expanded={menuOpen}
+              aria-controls="orbit-menu"
+            >
+              <span />
+              <span />
+              <span />
+            </button>
+          </div>
 
           <div className="site-actions">
             <span className="site-user">
@@ -473,6 +482,12 @@ export function HomePage() {
         <span>© 2026 SkyWord English</span>
         <Link to="/welcome">Giới thiệu SkyWord</Link>
       </footer>
+
+      <OrbitMenu
+        open={menuOpen}
+        onClose={() => setMenuOpen(false)}
+        userName={firstName}
+      />
     </div>
   )
 }
