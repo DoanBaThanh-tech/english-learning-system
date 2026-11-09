@@ -44,7 +44,7 @@ public sealed class AuthController : ControllerBase
         Ok(await _auth.RefreshAsync(request.RefreshToken, ct));
 
     [HttpPost("logout")]
-    [Authorize]
+    [AllowAnonymous] // Chỉ cần refresh token để thu hồi phiên, kể cả khi access token đã hết hạn.
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     public async Task<IActionResult> Logout([FromBody] LogoutRequest request, CancellationToken ct)
     {

@@ -8,7 +8,8 @@ public sealed record RegisterRequest(
     [Required, MinLength(8), MaxLength(100)] string Password,
     [Required, MaxLength(100)] string DisplayName,
     byte? CurrentLevelId = null,
-    string? TimeZoneId = null);
+    string? TimeZoneId = null,
+    [Range(1, 500)] short? DailyWordGoal = null);
 
 public sealed record LoginRequest(
     [Required, EmailAddress] string Email,

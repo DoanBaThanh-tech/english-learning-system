@@ -7,8 +7,9 @@ using Microsoft.EntityFrameworkCore;
 namespace EnglishApp.Api.Data;
 
 /// <summary>
-/// Nạp dữ liệu tham chiếu (từ vựng curated, scenario, bài đọc) và một tài khoản demo
-/// để mở Swagger/UI là dùng được ngay. Chạy lặp lại an toàn (idempotent).
+/// Chỉ nạp dữ liệu mẫu khi được bật rõ ràng bằng cấu hình Seed:Content / Seed:DemoUser.
+/// Mặc định tắt: database thật chỉ chứa dữ liệu do người dùng tạo, không có user mẫu
+/// và không nạp sẵn kho từ vựng/bài đọc.
 /// </summary>
 public sealed class DatabaseSeeder
 {
@@ -25,17 +26,22 @@ public sealed class DatabaseSeeder
 
     public async Task SeedAsync(CancellationToken ct = default)
     {
-        await SeedWordsAsync(ct);
-        await SeedScenariosAsync(ct);
-        await SeedPassagesAsync(ct);
+        var seedContent = _configuration.GetValue("Seed:Content", false);
+        if (seedContent)
+        {
+            await SeedWordsAsync(ct);
+            await SeedScenariosAsync(ct);
+            await SeedPassagesAsync(ct);
+        }
 
-        var seedDemo = _configuration.GetValue("Seed:DemoUser", true);
+        var seedDemo = _configuration.GetValue("Seed:DemoUser", false);
         if (seedDemo)
         {
             await SeedDemoUserAsync(ct);
         }
 
-        _logger.LogInformation("Database seeding finished");
+        _logger.LogInformation(
+            "Database seeding finished (content: {Content}, demo user: {Demo})", seedContent, seedDemo);
     }
 
     private async Task SeedWordsAsync(CancellationToken ct)

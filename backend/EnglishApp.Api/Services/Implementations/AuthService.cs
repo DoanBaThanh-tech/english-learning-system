@@ -64,7 +64,7 @@ public sealed class AuthService : IAuthService
             DisplayName = request.DisplayName.Trim(),
             CurrentLevelId = level?.Id,
             CurrentLevel = level,
-            DailyWordGoal = 20,
+            DailyWordGoal = request.DailyWordGoal ?? 20,
             TimeZoneId = timeZone,
             CreatedAt = DateTime.UtcNow,
             IsActive = true
