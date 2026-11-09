@@ -15,7 +15,12 @@ public sealed record UserProfileDto(
     DateTime CreatedAt);
 
 public sealed record UpdateProfileRequest(
-    [Required, MaxLength(100)] string DisplayName,
+    [Required(ErrorMessage = "Tên gọi là thông tin bắt buộc.")]
+    [StringLength(30, MinimumLength = 2,
+        ErrorMessage = "Tên gọi chỉ được chứa chữ cái và khoảng trắng, tối đa 30 ký tự.")]
+    [RegularExpression(@"^[\p{L}\p{M}]+(?: [\p{L}\p{M}]+)*$",
+        ErrorMessage = "Tên gọi chỉ được chứa chữ cái và khoảng trắng, không có số hoặc ký tự đặc biệt.")]
+    string DisplayName,
     [MaxLength(500)] string? AvatarUrl,
     byte? CurrentLevelId,
     [Range(1, 500)] short? DailyWordGoal,

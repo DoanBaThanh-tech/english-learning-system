@@ -1,5 +1,6 @@
 using System.Security.Cryptography;
 using System.Text;
+using System.Text.RegularExpressions;
 using EnglishApp.Api.Common.Auth;
 using EnglishApp.Api.Common.Exceptions;
 using EnglishApp.Api.Common.Utilities;
@@ -15,6 +16,12 @@ namespace EnglishApp.Api.Services.Implementations;
 
 public sealed class AuthService : IAuthService
 {
+    private static readonly Regex DisplayNamePattern =
+        new(@"^[\p{L}\p{M}]+(?: [\p{L}\p{M}]+)*$", RegexOptions.Compiled);
+
+    private static readonly Regex PasswordSpecialPattern =
+        new(@"[^A-Za-z0-9\s]", RegexOptions.Compiled);
+
     private readonly AppDbContext _db;
     private readonly IUserRepository _users;
     private readonly IJwtTokenService _jwt;
@@ -48,6 +55,19 @@ public sealed class AuthService : IAuthService
             throw new ConflictException("Email này đã được sử dụng.");
         }
 
+        var displayName = request.DisplayName.Trim();
+        if (displayName.Length is < 2 or > 30 || !DisplayNamePattern.IsMatch(displayName))
+        {
+            throw new BadRequestException(
+                "Tên gọi chỉ được chứa chữ cái và khoảng trắng, tối đa 30 ký tự.");
+        }
+
+        if (request.Password.Length is < 8 or > 20 || !PasswordSpecialPattern.IsMatch(request.Password))
+        {
+            throw new BadRequestException(
+                "Mật khẩu phải từ 8 đến 20 ký tự và có ít nhất 1 ký tự đặc biệt.");
+        }
+
         Level? level = null;
         if (request.CurrentLevelId is not null)
         {
@@ -61,7 +81,7 @@ public sealed class AuthService : IAuthService
         {
             Email = email,
             PasswordHash = PasswordHasher.Hash(request.Password),
-            DisplayName = request.DisplayName.Trim(),
+            DisplayName = displayName,
             CurrentLevelId = level?.Id,
             CurrentLevel = level,
             DailyWordGoal = request.DailyWordGoal ?? 20,
