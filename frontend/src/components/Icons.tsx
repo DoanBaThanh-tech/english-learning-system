@@ -184,6 +184,147 @@ export function CloseIcon({ size = 20, className }: IconProps) {
   )
 }
 
+export function SpeakerIcon({ size = 20, className }: IconProps) {
+  return (
+    <svg {...base(size)} className={className}>
+      <path d="M4.5 9.5h3l4.5-3.6v12.2l-4.5-3.6h-3a1 1 0 0 1-1-1v-3a1 1 0 0 1 1-1Z" />
+      <path d="M15.5 9a4.2 4.2 0 0 1 0 6" />
+      <path d="M18 6.6a7.6 7.6 0 0 1 0 10.8" />
+    </svg>
+  )
+}
+
+export function CopyIcon({ size = 18, className }: IconProps) {
+  return (
+    <svg {...base(size)} className={className}>
+      <rect x="8.5" y="8.5" width="11" height="11" rx="2.5" />
+      <path d="M15.5 8.5V6.8a2.3 2.3 0 0 0-2.3-2.3H6.8a2.3 2.3 0 0 0-2.3 2.3v6.4a2.3 2.3 0 0 0 2.3 2.3h1.7" />
+    </svg>
+  )
+}
+
+export function SearchIcon({ size = 18, className }: IconProps) {
+  return (
+    <svg {...base(size)} className={className}>
+      <circle cx="11" cy="11" r="6.4" />
+      <path d="m16 16 4 4" />
+    </svg>
+  )
+}
+
+export function PlusIcon({ size = 18, className }: IconProps) {
+  return (
+    <svg {...base(size)} className={className} strokeWidth={2.1}>
+      <path d="M12 5v14M5 12h14" />
+    </svg>
+  )
+}
+
+export function TrashIcon({ size = 18, className }: IconProps) {
+  return (
+    <svg {...base(size)} className={className}>
+      <path d="M4.5 7h15M9.5 7V5.2A1.7 1.7 0 0 1 11.2 3.5h1.6a1.7 1.7 0 0 1 1.7 1.7V7" />
+      <path d="M6.5 7l.8 12a2 2 0 0 0 2 1.9h5.4a2 2 0 0 0 2-1.9l.8-12" />
+      <path d="M10 11v5.5M14 11v5.5" />
+    </svg>
+  )
+}
+
+export function EditIcon({ size = 18, className }: IconProps) {
+  return (
+    <svg {...base(size)} className={className}>
+      <path d="M4.5 19.5h4L20 8a2.5 2.5 0 0 0-3.5-3.5L5 16v3.5Z" />
+      <path d="m14.5 6.5 3 3" />
+    </svg>
+  )
+}
+
+export function FlameIcon({ size = 18, className }: IconProps) {
+  return (
+    <svg {...base(size)} className={className}>
+      <path d="M12 3.5c.5 3.2-2.4 4.4-2.4 7.2 0 1.5 1 2.7 2.4 2.7s2.4-1.2 2.4-2.7c0-1-.4-1.8-1-2.6 2.6.8 4.1 3 4.1 5.5A5.5 5.5 0 0 1 12 19.1a5.5 5.5 0 0 1-5.5-5.5c0-4.2 4.1-6.6 5.5-10.1Z" />
+    </svg>
+  )
+}
+
+export function ClockIcon({ size = 18, className }: IconProps) {
+  return (
+    <svg {...base(size)} className={className}>
+      <circle cx="12" cy="12" r="8.5" />
+      <path d="M12 7.5V12l3 2" />
+    </svg>
+  )
+}
+
+export function TrophyIcon({ size = 18, className }: IconProps) {
+  return (
+    <svg {...base(size)} className={className}>
+      <path d="M8 4.5h8v4.2a4 4 0 0 1-8 0V4.5Z" />
+      <path d="M8 6H4.8v1.3A3.2 3.2 0 0 0 8 10.5M16 6h3.2v1.3a3.2 3.2 0 0 1-3.2 3.2" />
+      <path d="M12 12.7v4.1M8.5 20h7M10 20c0-1.7.8-3.2 2-3.2s2 1.5 2 3.2" />
+    </svg>
+  )
+}
+
+export function FolderIcon({ size = 18, className }: IconProps) {
+  return (
+    <svg {...base(size)} className={className}>
+      <path d="M3.5 7.5A2 2 0 0 1 5.5 5.5h3.2l2 2.2h7.8a2 2 0 0 1 2 2v7.8a2 2 0 0 1-2 2h-13a2 2 0 0 1-2-2V7.5Z" />
+    </svg>
+  )
+}
+
+export function TagIcon({ size = 18, className }: IconProps) {
+  return (
+    <svg {...base(size)} className={className}>
+      <path d="M4 4.5h6.4l9 9a1.8 1.8 0 0 1 0 2.6l-3.3 3.3a1.8 1.8 0 0 1-2.6 0l-9-9V4.5Z" />
+      <circle cx="8" cy="8" r="1.3" />
+    </svg>
+  )
+}
+
+export function ShieldIcon({ size = 18, className }: IconProps) {
+  return (
+    <svg {...base(size)} className={className}>
+      <path d="M12 3.5 19 6v6c0 4.3-3.1 7.2-7 8.5-3.9-1.3-7-4.2-7-8.5V6l7-2.5Z" />
+      <path d="m9 12 2 2 4-4" />
+    </svg>
+  )
+}
+
+export function TrendingIcon({ size = 18, className }: IconProps) {
+  return (
+    <svg {...base(size)} className={className}>
+      <path d="M4 16.5 9.5 11l3.5 3.5L20 7.5" />
+      <path d="M15.5 7.5H20V12" />
+    </svg>
+  )
+}
+
+export function PlayIcon({ size = 18, className }: IconProps) {
+  return (
+    <svg {...base(size)} className={className}>
+      <path d="M8 5.5v13l10-6.5-10-6.5Z" />
+    </svg>
+  )
+}
+
+export function ChevronLeftIcon({ size = 18, className }: IconProps) {
+  return (
+    <svg {...base(size)} className={className} strokeWidth={2.1}>
+      <path d="m14.5 5.5-6.5 6.5 6.5 6.5" />
+    </svg>
+  )
+}
+
+export function ChevronRightIcon({ size = 18, className }: IconProps) {
+  return (
+    <svg {...base(size)} className={className} strokeWidth={2.1}>
+      <path d="m9.5 5.5 6.5 6.5-6.5 6.5" />
+    </svg>
+  )
+}
+
 export function LogoutIcon({ size = 18, className }: IconProps) {
   return (
     <svg {...base(size)} className={className}>

@@ -183,6 +183,82 @@
   color: var(--muted);
 }
 
+.reg-persona {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 18px;
+  padding: 14px 16px;
+  border-radius: 16px;
+  border: 1px solid rgba(120, 190, 240, 0.42);
+  background:
+    linear-gradient(135deg, rgba(236, 248, 255, 0.95), rgba(255, 255, 255, 0.88)),
+    #f4fbff;
+  box-shadow: 0 10px 24px -18px rgba(38, 108, 160, 0.55);
+  animation: fadeUp 0.5s var(--ease-out) both;
+}
+
+.reg-persona__top {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.reg-persona__eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--sky-700);
+  font-size: 0.71rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.reg-persona__edit {
+  font-size: 0.76rem;
+  font-weight: 600;
+  color: var(--sky-700);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.reg-persona__edit:hover {
+  color: var(--sky-800, #1f5f8b);
+}
+
+.reg-persona__title {
+  font-family: 'Baloo 2', 'Be Vietnam Pro', sans-serif;
+  font-size: 1.02rem;
+  line-height: 1.25;
+  color: var(--ink);
+}
+
+.reg-persona__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.reg-persona__chips span {
+  padding: 4px 9px;
+  border-radius: 999px;
+  background: rgba(215, 237, 253, 0.9);
+  color: var(--sky-700);
+  font-size: 0.69rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.reg-persona p {
+  margin: 0;
+  font-size: 0.79rem;
+  line-height: 1.55;
+  color: var(--muted);
+}
+
 .auth-form {
   display: flex;
   flex-direction: column;

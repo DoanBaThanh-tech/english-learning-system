@@ -126,7 +126,7 @@ export function LandingPage() {
                 </Link>
               ) : (
                 <>
-                  <Link to="/register" className="btn btn--primary btn--hero">
+                  <Link to="/onboarding" className="btn btn--primary btn--hero">
                     Bắt đầu miễn phí
                     <ArrowRightIcon size={19} />
                   </Link>
@@ -227,7 +227,7 @@ export function LandingPage() {
                   <p>Tạo tài khoản miễn phí và bắt đầu với từ đầu tiên.</p>
                 </div>
                 <div className="cta__actions">
-                  <Link to="/register" className="btn btn--primary btn--hero">
+                  <Link to="/onboarding" className="btn btn--primary btn--hero">
                     Tạo tài khoản
                     <ArrowRightIcon size={19} />
                   </Link>

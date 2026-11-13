@@ -1,5 +1,5 @@
 import { useMemo, useState, type FormEvent } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { AuthLayout } from '../components/AuthLayout'
 import {
   ArrowRightIcon,
@@ -13,6 +13,13 @@ import {
 import { PasswordField } from '../components/PasswordField'
 import { ApiError } from '../lib/api'
 import { useAuth } from '../lib/AuthContext'
+import {
+  levelInfo,
+  purposeInfo,
+  sourceLabel,
+  suggestedGoal,
+  type OnboardingAnswers,
+} from '../lib/personalization'
 import '../styles/auth.css'
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
@@ -40,6 +47,10 @@ type FieldErrors = {
   terms?: string
 }
 
+type LocationState = {
+  onboarding?: Partial<OnboardingAnswers>
+}
+
 function passwordScore(value: string): number {
   let score = 0
   if (value.length >= 8) score += 1
@@ -54,11 +65,21 @@ const STRENGTH_LABELS = ['Quá ngắn', 'Yếu', 'Ổn', 'Khá mạnh', 'Rất m
 
 export function RegisterPage() {
   const navigate = useNavigate()
+  const location = useLocation()
   const { register } = useAuth()
+
+  // Câu trả lời từ trang onboarding (nếu người dùng đi qua bước hỏi thông tin).
+  const answers = (location.state as LocationState | null)?.onboarding ?? null
+  const chosenLevel = levelInfo(answers?.levelId ?? null)
+  const chosenPurpose = purposeInfo(answers?.purpose ?? null)
+  const hasOnboarding = Boolean(chosenLevel || chosenPurpose)
+
   const [displayName, setDisplayName] = useState('')
   const [email, setEmail] = useState('')
-  const [levelId, setLevelId] = useState<number | null>(null)
-  const [goal, setGoal] = useState<number>(20)
+  const [levelId, setLevelId] = useState<number | null>(answers?.levelId ?? null)
+  const [goal, setGoal] = useState<number>(() =>
+    hasOnboarding ? suggestedGoal(chosenLevel?.code ?? null, answers?.purpose ?? null) : 20,
+  )
   const [password, setPassword] = useState('')
   const [confirm, setConfirm] = useState('')
   const [terms, setTerms] = useState(false)
@@ -123,6 +144,8 @@ export function RegisterPage() {
         password,
         currentLevelId: levelId,
         dailyWordGoal: goal,
+        learningPurpose: answers?.purpose ?? undefined,
+        referralSource: answers?.source ?? undefined,
       })
       // Tạo xong tài khoản thì chuyển sang đăng nhập, điền sẵn email vừa đăng ký.
       navigate('/login', {
@@ -150,6 +173,37 @@ export function RegisterPage() {
         <h1>Tạo tài khoản của bạn</h1>
         <p>Chỉ mất một phút để bầu trời tiếng Anh của bạn được mở ra.</p>
       </div>
+
+      {hasOnboarding ? (
+        <div className="reg-persona" aria-label="Lộ trình gợi ý từ câu trả lời của bạn">
+          <div className="reg-persona__top">
+            <span className="reg-persona__eyebrow">
+              <SparkIcon size={14} />
+              Lộ trình dành riêng bạn
+            </span>
+            <Link
+              to="/onboarding"
+              state={{ onboarding: answers }}
+              className="reg-persona__edit"
+            >
+              Đổi câu trả lời
+            </Link>
+          </div>
+          <strong className="reg-persona__title">
+            {chosenPurpose?.program ?? 'Chương trình theo trình độ của bạn'}
+          </strong>
+          <div className="reg-persona__chips">
+            {chosenLevel ? <span>{chosenLevel.code} · {chosenLevel.label}</span> : null}
+            {chosenPurpose ? <span>{chosenPurpose.label}</span> : null}
+            {answers?.source ? <span>Biết qua {sourceLabel(answers.source)}</span> : null}
+            <span>{goal} từ/ngày</span>
+          </div>
+          <p>
+            {chosenPurpose?.tagline ??
+              'SkyWord dùng trình độ bạn chọn để chọn độ khó và nhịp học phù hợp.'}
+          </p>
+        </div>
+      ) : null}
 
       <form className="auth-form" onSubmit={handleSubmit} noValidate>
         {error ? (

@@ -1,14 +1,14 @@
 import { useCallback, useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import skyBackground from '../assets/sky-background.webp'
-import { BrandOrbit } from '../components/BrandOrbit'
+import { AppHeader } from '../components/AppHeader'
 import { OrbitMenu } from '../components/OrbitMenu'
 import {
+  ArrowRightIcon,
   BookmarkIcon,
   CalendarIcon,
   CheckIcon,
   GraduationIcon,
-  LogoutIcon,
   SparkIcon,
   TargetIcon,
 } from '../components/Icons'
@@ -19,6 +19,7 @@ import {
   type Dashboard,
 } from '../lib/api'
 import { useAuth } from '../lib/AuthContext'
+import { buildProgram } from '../lib/personalization'
 import '../styles/landing.css'
 import '../styles/home.css'
 
@@ -167,6 +168,12 @@ export function HomePage() {
       ? `${profile.levelCode} · ${profile.levelName}`
       : 'Chưa chọn trình độ'
 
+  const program = buildProgram(
+    profile.levelCode,
+    profile.levelName,
+    profile.learningPurpose,
+  )
+
   const heroLine = goalMet
     ? 'Bạn đã chạm mục tiêu hôm nay. Một chút ôn tập nhẹ nhàng sẽ giúp những từ mới đọng lại lâu hơn.'
     : learned === 0
@@ -209,51 +216,14 @@ export function HomePage() {
       />
       <div className="home__veil" aria-hidden="true" />
 
-      <header className="site-header">
-        <div className="site-shell site-header__inner">
-          <div className="home-brand-group">
-            <Link to="/app" className="site-brand" aria-label="SkyWord English - trang chủ">
-              <BrandOrbit size={42} />
-              <span className="site-brand__word">
-                <strong>SkyWord</strong>
-                <em>English</em>
-              </span>
-            </Link>
-
-            <button
-              type="button"
-              className="menu-toggle"
-              onClick={() => setMenuOpen(true)}
-              aria-label="Mở menu chức năng"
-              aria-haspopup="dialog"
-              aria-expanded={menuOpen}
-              aria-controls="orbit-menu"
-            >
-              <span />
-              <span />
-              <span />
-            </button>
-          </div>
-
-          <div className="site-actions">
-            <span className="site-user">
-              <span className="site-user__avatar">{initial}</span>
-              <span className="site-user__label">
-                Xin chào, <strong>{displayName}</strong>
-              </span>
-            </span>
-            <button
-              type="button"
-              className="btn btn--ghost btn--compact"
-              onClick={handleLogout}
-              disabled={leaving}
-            >
-              <LogoutIcon size={17} />
-              {leaving ? 'Đang thoát...' : 'Đăng xuất'}
-            </button>
-          </div>
-        </div>
-      </header>
+      <AppHeader
+        displayName={displayName}
+        initial={initial}
+        menuOpen={menuOpen}
+        onOpenMenu={() => setMenuOpen(true)}
+        onLogout={handleLogout}
+        leaving={leaving}
+      />
 
       <main className="home__main">
         {loading && !dashboard ? (
@@ -352,6 +322,67 @@ export function HomePage() {
                   </div>
                 </div>
               </div>
+            </section>
+
+            <section className="home-program site-shell" aria-label="Chương trình học dành cho bạn">
+              <article className="program-card">
+                <div className="program-card__copy">
+                  <span className="program-card__eyebrow">
+                    <SparkIcon size={14} />
+                    Chương trình dành cho bạn
+                  </span>
+                  <h2>{program.title}</h2>
+                  <p>
+                    {program.hasPurpose
+                      ? program.tagline
+                      : 'Bạn chưa chọn mục tiêu học. Chọn một mục tiêu để SkyWord tập trung đúng phần kiến thức bạn sẽ dùng.'}
+                  </p>
+                  <ul className="program-card__steps">
+                    {program.steps.map((step, index) => (
+                      <li key={step}>
+                        <span>{index + 1}</span>
+                        {step}
+                      </li>
+                    ))}
+                  </ul>
+                  <div className="program-card__actions">
+                    <Link
+                      to={program.hasPurpose ? '/app/plan' : '/app/profile'}
+                      className="btn btn--primary program-card__cta"
+                    >
+                      {program.hasPurpose ? 'Mở lộ trình này' : 'Chọn mục tiêu học'}
+                      <ArrowRightIcon size={17} />
+                    </Link>
+                    {program.hasPurpose ? (
+                      <Link to="/app/profile" className="program-card__edit">
+                        Đổi mục tiêu
+                      </Link>
+                    ) : null}
+                  </div>
+                </div>
+
+                <div className="program-card__side">
+                  <span className="program-card__band">{program.levelBand}</span>
+                  <strong>{program.levelLabel}</strong>
+                  <div className="program-card__meta">
+                    <div>
+                      <b>{goal}</b>
+                      <span>từ/ngày</span>
+                    </div>
+                    <div>
+                      <b>{program.minutes}</b>
+                      <span>phút/ngày</span>
+                    </div>
+                    <div>
+                      <b>{program.days}</b>
+                      <span>ngày mỗi chặng</span>
+                    </div>
+                  </div>
+                  <span className="program-card__focus">
+                    Trọng tâm: {program.purposeLabel}
+                  </span>
+                </div>
+              </article>
             </section>
 
             <section className="home-stats site-shell" aria-label="Thống kê học tập">

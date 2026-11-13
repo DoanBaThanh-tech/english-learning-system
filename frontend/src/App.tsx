@@ -1,11 +1,17 @@
 import { useEffect, type ReactNode } from 'react'
 import { Navigate, Route, Routes, useLocation } from 'react-router-dom'
 import { AuthProvider, useAuth } from './lib/AuthContext'
+import { ContextPage } from './pages/ContextPage'
 import { HomePage } from './pages/HomePage'
 import { LandingPage } from './pages/LandingPage'
 import { LoginPage } from './pages/LoginPage'
+import { OnboardingPage } from './pages/OnboardingPage'
+import { PlanPage } from './pages/PlanPage'
+import { ProfilePage } from './pages/ProfilePage'
 import { RegisterPage } from './pages/RegisterPage'
 import { SplashPage } from './pages/SplashPage'
+import { StatsPage } from './pages/StatsPage'
+import { WordBookPage } from './pages/WordBookPage'
 
 function ScrollToTop() {
   const { pathname } = useLocation()
@@ -56,6 +62,14 @@ export default function App() {
           }
         />
         <Route
+          path="/onboarding"
+          element={
+            <GuestOnly>
+              <OnboardingPage />
+            </GuestOnly>
+          }
+        />
+        <Route
           path="/register"
           element={
             <GuestOnly>
@@ -68,6 +82,46 @@ export default function App() {
           element={
             <RequireAuth>
               <HomePage />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="/app/context"
+          element={
+            <RequireAuth>
+              <ContextPage />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="/app/words"
+          element={
+            <RequireAuth>
+              <WordBookPage />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="/app/profile"
+          element={
+            <RequireAuth>
+              <ProfilePage />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="/app/stats"
+          element={
+            <RequireAuth>
+              <StatsPage />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="/app/plan"
+          element={
+            <RequireAuth>
+              <PlanPage />
             </RequireAuth>
           }
         />

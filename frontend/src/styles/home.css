@@ -42,7 +42,7 @@
 }
 
 /* ---------- Header: brand + menu ---------- */
-.home-brand-group {
+.app-brand-group {
   display: flex;
   align-items: center;
   gap: clamp(8px, 1vw, 12px);
@@ -299,6 +299,195 @@
 .goal-card__mini b {
   color: var(--ink);
   font-weight: 700;
+}
+
+/* ---------- Chương trình cá nhân hóa ---------- */
+.home-program {
+  padding: 0 0 clamp(22px, 3.4vw, 36px);
+}
+
+.program-card {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(230px, 0.65fr);
+  gap: clamp(20px, 3vw, 40px);
+  padding: clamp(22px, 3vw, 34px);
+  border-radius: 26px;
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  background:
+    radial-gradient(120% 140% at 0% 0%, rgba(205, 236, 255, 0.75), transparent 55%),
+    linear-gradient(125deg, rgba(255, 255, 255, 0.94), rgba(236, 248, 255, 0.82));
+  box-shadow: 0 26px 60px -42px rgba(15, 71, 116, 0.6);
+  overflow: hidden;
+  animation: fadeUp 0.7s var(--ease-out) both;
+}
+
+.program-card__copy {
+  position: relative;
+  z-index: 1;
+  min-width: 0;
+}
+
+.program-card__eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 5px 11px;
+  border-radius: 999px;
+  background: rgba(224, 242, 255, 0.95);
+  color: var(--sky-700);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.045em;
+  text-transform: uppercase;
+}
+
+.program-card h2 {
+  margin-top: 12px;
+  font-family: 'Baloo 2', 'Be Vietnam Pro', sans-serif;
+  font-size: clamp(1.35rem, 2.4vw, 1.9rem);
+  font-weight: 700;
+  line-height: 1.15;
+  letter-spacing: -0.015em;
+  color: var(--ink);
+  text-wrap: balance;
+}
+
+.program-card__copy > p {
+  max-width: 58ch;
+  margin-top: 8px;
+  font-size: 0.9rem;
+  line-height: 1.65;
+  color: var(--ink-2);
+}
+
+.program-card__steps {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 8px;
+  margin-top: 16px;
+  padding: 0;
+  list-style: none;
+}
+
+.program-card__steps li {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 9px 11px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.7);
+  border: 1px solid rgba(123, 189, 240, 0.24);
+  font-size: 0.78rem;
+  font-weight: 500;
+  line-height: 1.45;
+  color: var(--ink-2);
+}
+
+.program-card__steps span {
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: rgba(75, 164, 230, 0.16);
+  color: var(--sky-700);
+  font-size: 0.68rem;
+  font-weight: 700;
+}
+
+.program-card__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 14px;
+  margin-top: 18px;
+}
+
+.program-card__cta {
+  gap: 8px;
+}
+
+.program-card__edit {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--sky-700);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.program-card__edit:hover {
+  color: var(--sky-800, #1f5f8b);
+}
+
+.program-card__side {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: clamp(16px, 2vw, 22px);
+  border-radius: 20px;
+  background:
+    radial-gradient(120% 100% at 100% 0%, rgba(120, 200, 245, 0.5), transparent 60%),
+    linear-gradient(160deg, #1d6ba6 0%, #2f8ed8 100%);
+  color: #f4fbff;
+  box-shadow: 0 18px 40px -26px rgba(16, 76, 122, 0.85);
+}
+
+.program-card__band {
+  width: fit-content;
+  padding: 4px 9px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.18);
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.program-card__side > strong {
+  margin-top: 6px;
+  font-family: 'Baloo 2', 'Be Vietnam Pro', sans-serif;
+  font-size: 1.15rem;
+  line-height: 1.2;
+}
+
+.program-card__meta {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 12px;
+}
+
+.program-card__meta div {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 6px 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+.program-card__meta b {
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+.program-card__meta span {
+  font-size: 0.72rem;
+  font-weight: 500;
+  color: rgba(244, 251, 255, 0.82);
+}
+
+.program-card__focus {
+  margin-top: auto;
+  padding-top: 12px;
+  border-top: 1px solid rgba(255, 255, 255, 0.18);
+  font-size: 0.74rem;
+  font-weight: 600;
+  color: rgba(244, 251, 255, 0.92);
 }
 
 /* ---------- Stat tiles ---------- */
@@ -664,6 +853,22 @@
   .home-stats {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
+
+  .program-card {
+    grid-template-columns: 1fr;
+  }
+
+  .program-card__meta {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
+  }
+
+  .program-card__meta div {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+  }
 }
 
 @media (max-width: 620px) {
@@ -713,6 +918,19 @@
 }
 
 @media (max-width: 430px) {
+  .program-card {
+    padding: 18px;
+    border-radius: 20px;
+  }
+
+  .program-card__steps {
+    grid-template-columns: 1fr;
+  }
+
+  .program-card__meta span {
+    font-size: 0.66rem;
+  }
+
   .goal-card {
     flex-direction: column;
     align-items: stretch;

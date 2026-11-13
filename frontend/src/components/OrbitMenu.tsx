@@ -10,6 +10,7 @@ import { Link } from 'react-router-dom'
 import skyBackground from '../assets/sky-background.webp'
 import { BrandOrbit } from './BrandOrbit'
 import {
+  ArrowRightIcon,
   BookIcon,
   BookmarkIcon,
   CalendarIcon,
@@ -31,6 +32,7 @@ type Feature = {
   short: string
   description: string
   icon: IconComponent
+  path?: string
 }
 
 const FEATURES: Feature[] = [
@@ -42,6 +44,7 @@ const FEATURES: Feature[] = [
     description:
       'Chọn đúng nghĩa của từ theo cả câu, kèm ví dụ và độ tin cậy thay vì nghĩa đầu tiên.',
     icon: LayersIcon,
+    path: '/app/context',
   },
   {
     id: 'memory',
@@ -51,6 +54,7 @@ const FEATURES: Feature[] = [
     description:
       'Lưu từ kèm câu gốc và ôn lại đúng lúc theo nhịp ghi nhớ riêng của bạn.',
     icon: BookmarkIcon,
+    path: '/app/words',
   },
   {
     id: 'echo',
@@ -87,6 +91,7 @@ const FEATURES: Feature[] = [
     description:
       'Nhiệm vụ hằng ngày theo mục tiêu, trình độ và quỹ thời gian của bạn.',
     icon: CalendarIcon,
+    path: '/app/plan',
   },
   {
     id: 'stats',
@@ -96,6 +101,7 @@ const FEATURES: Feature[] = [
     description:
       'Chuỗi ngày, hoạt động 7 ngày và điểm năm kỹ năng được cập nhật sau mỗi bài.',
     icon: ChartIcon,
+    path: '/app/stats',
   },
   {
     id: 'profile',
@@ -105,6 +111,7 @@ const FEATURES: Feature[] = [
     description:
       'Đổi tên gọi, trình độ, mục tiêu từ vựng và múi giờ học của riêng bạn.',
     icon: UserIcon,
+    path: '/app/profile',
   },
 ]
 
@@ -282,13 +289,20 @@ export function OrbitMenu({ open, onClose, userName }: OrbitMenuProps) {
               >
                 <button
                   type="button"
-                  className={`orbit-menu__node-button${isActive ? ' is-active' : ''}`}
+                  className={`orbit-menu__node-button${isActive ? ' is-active' : ''}${
+                    feature.path ? ' is-live' : ''
+                  }`}
                   onClick={() => setSelectedId(isActive ? null : feature.id)}
                   aria-pressed={isActive}
-                  aria-label={`${feature.title}. ${feature.description}`}
+                  aria-label={`${feature.title}. ${feature.description}${
+                    feature.path ? ' Đã mở.' : ''
+                  }`}
                 >
                   <Icon size={26} />
                   <span className="orbit-menu__node-label">{feature.short}</span>
+                  {feature.path ? (
+                    <span className="orbit-menu__node-live" aria-hidden="true" />
+                  ) : null}
                 </button>
               </div>
             )
@@ -319,9 +333,16 @@ export function OrbitMenu({ open, onClose, userName }: OrbitMenuProps) {
                 : 'Chạm vào một vòng quanh quỹ đạo để xem chức năng bạn sắp mở.'}
             </p>
           </div>
-          <span className={`orbit-menu__chip${selected ? ' is-soon' : ''}`}>
-            {selected ? 'Sắp mở' : `${FEATURES.length} chức năng`}
-          </span>
+          {selected?.path ? (
+            <Link to={selected.path} className="orbit-menu__cta" onClick={onClose}>
+              Mở chức năng
+              <ArrowRightIcon size={16} />
+            </Link>
+          ) : (
+            <span className={`orbit-menu__chip${selected ? ' is-soon' : ''}`}>
+              {selected ? 'Sắp mở' : `${FEATURES.length} chức năng`}
+            </span>
+          )}
         </div>
 
         <nav className="orbit-menu__quick" aria-label="Điều hướng nhanh">
