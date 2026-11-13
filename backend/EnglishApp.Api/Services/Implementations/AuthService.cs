@@ -86,6 +86,8 @@ public sealed class AuthService : IAuthService
             CurrentLevel = level,
             DailyWordGoal = request.DailyWordGoal ?? 20,
             TimeZoneId = timeZone,
+            LearningPurpose = OnboardingCodes.CleanPurpose(request.LearningPurpose),
+            ReferralSource = OnboardingCodes.CleanSource(request.ReferralSource),
             CreatedAt = DateTime.UtcNow,
             IsActive = true
         };

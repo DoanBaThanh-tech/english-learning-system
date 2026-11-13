@@ -48,7 +48,8 @@ public static class SenseMatcher
                 if (ratio > 0.35) scores[i] += ratio * 2;
             }
 
-            scores[i] += PosBoost(candidate.PartOfSpeech, sentence);
+            scores[i] += PosBoost(candidate.PartOfSpeech, sentence, targetWord);
+            scores[i] += SubjectSenseBoost(sentence, candidate, targetWord);
             scores[i] += LooksLikeTargetSense(sentence, targetWord, candidate);
         }
 
@@ -65,24 +66,222 @@ public static class SenseMatcher
         return new SenseChoice(best, Math.Round(confidence, 1));
     }
 
-    private static double PosBoost(string pos, string sentence)
+    private static readonly HashSet<string> Determiners = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "a", "an", "the", "this", "that", "these", "those", "my", "your", "his", "her",
+        "its", "our", "their", "some", "any", "no", "each", "every", "another"
+    };
+
+    private static readonly HashSet<string> ModalMarkers = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "to", "will", "would", "can", "could", "should", "must", "may", "might",
+        "do", "does", "did", "not", "never", "please"
+    };
+
+    private static readonly HashSet<string> Subjects = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "i", "you", "he", "she", "it", "we", "they", "who", "someone", "everyone"
+    };
+
+    private static readonly HashSet<string> BeForms = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "is", "are", "was", "were", "am", "be", "been", "being", "seems", "feels"
+    };
+
+    private static readonly HashSet<string> Prepositions = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "of", "in", "on", "at", "by", "for", "with", "from", "about", "into",
+        "through", "during", "before", "after", "under", "over", "between"
+    };
+
+    private static readonly HashSet<string> Intensifiers = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "very", "so", "too", "really", "quite", "extremely", "fairly", "pretty"
+    };
+
+    private static readonly HashSet<string> ParticleWords = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "up", "down", "out", "off", "over", "back", "away", "through", "around", "about", "along"
+    };
+
+    private static readonly HashSet<string> LinkVerbs = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "is", "are", "was", "were", "am", "be", "been", "being",
+        "seem", "seems", "seemed", "feel", "feels", "felt",
+        "stay", "stays", "stayed", "remain", "remains", "remained",
+        "become", "becomes", "became", "grow", "grows", "grew",
+        "look", "looks", "looked", "sound", "sounds", "sounded",
+        "turn", "turns", "turned", "get", "gets", "got"
+    };
+
+    private static readonly HashSet<string> PersonWords = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "i", "you", "he", "she", "we", "they", "who", "someone", "everyone",
+        "people", "person", "child", "children", "student", "students",
+        "team", "teams", "employee", "employees", "worker", "workers",
+        "friend", "friends", "leader", "leaders", "player", "players",
+        "man", "woman", "men", "women", "boy", "girl"
+    };
+
+    /// <summary>
+    /// Cộng điểm theo vị trí thật của từ cần tra trong câu. Ví dụ "She runs a small café"
+    /// cho thấy sau "runs" là mạo từ + danh từ nên đây gần như chắc chắn là động từ,
+    /// còn "The bank is closed" cho thấy "bank" đứng trước "is" nên là danh từ.
+    /// </summary>
+    private static double PosBoost(string pos, string sentence, string targetWord)
+    {
+        var tokens = TextUtil.Tokenize(sentence);
+        var targetTokens = TextUtil.Tokenize(targetWord);
+        var index = -1;
+
+        if (targetTokens.Count > 0)
+        {
+            for (var i = 0; i < tokens.Count; i++)
+            {
+                if (string.Equals(tokens[i], targetTokens[0], StringComparison.OrdinalIgnoreCase))
+                {
+                    index = i;
+                    break;
+                }
+            }
+        }
+
+        if (index < 0)
+        {
+            return FallbackPosBoost(pos, sentence);
+        }
+
+        var previous = index > 0 ? tokens[index - 1] : string.Empty;
+        var next = index + 1 < tokens.Count ? tokens[index + 1] : string.Empty;
+        var word = targetTokens[0];
+
+        switch (pos)
+        {
+            case "verb":
+            {
+                var boost = 0d;
+                if (ModalMarkers.Contains(previous)) boost += 0.9;
+                if (Subjects.Contains(previous)) boost += 0.6;
+                if (Determiners.Contains(next)) boost += 0.7;
+                if (Prepositions.Contains(next)) boost += 0.1;
+                if (ParticleWords.Contains(next)) boost += 0.15;
+                if (Subjects.Contains(previous) &&
+                    (word.EndsWith('s') || word.EndsWith("ed", StringComparison.Ordinal) ||
+                     word.EndsWith("ing", StringComparison.Ordinal)))
+                {
+                    boost += 0.15;
+                }
+                return Math.Min(boost, 1.5);
+            }
+
+            case "noun":
+            {
+                var boost = 0d;
+                if (Determiners.Contains(previous)) boost += 1.0;
+                if (BeForms.Contains(next)) boost += 0.6;
+                if (Prepositions.Contains(previous)) boost += 0.15;
+                if (string.Equals(next, "of", StringComparison.OrdinalIgnoreCase)) boost += 0.2;
+                return Math.Min(boost, 1.3);
+            }
+
+            case "adjective":
+            {
+                var boost = 0d;
+                if (BeForms.Contains(previous)) boost += 0.85;
+                if (Intensifiers.Contains(previous)) boost += 0.45;
+                if (Determiners.Contains(next)) boost += 0.15;
+                return Math.Min(boost, 1.1);
+            }
+
+            case "adverb":
+                return Subjects.Contains(previous) || ModalMarkers.Contains(previous) ? 0.1 : 0;
+
+            default:
+                return 0;
+        }
+    }
+
+    private static double FallbackPosBoost(string pos, string sentence)
     {
         var lower = sentence.ToLowerInvariant();
-        var tokens = TextUtil.Tokenize(sentence);
-        var articleBefore = false;
-        for (var i = 1; i < tokens.Count; i++)
-        {
-            if (tokens[i - 1] is "a" or "an" or "the") articleBefore = true;
-        }
 
         return pos switch
         {
             "verb" when ContainsAny(lower, " to ", " will ", " can ", " should ", " must ", " may ", " might ", " did ", " does ", " do ", " not ") => 0.55,
-            "noun" when articleBefore => 0.45,
             "adjective" when ContainsAny(lower, " very ", " so ", " too ", " really ", " quite ") => 0.35,
             "adverb" => 0.15,
             _ => 0
         };
+    }
+
+    /// <summary>
+    /// Với tính từ, phân biệt nghĩa dành cho người/hệ thống và nghĩa dành cho
+    /// vật liệu/vật thể. Ví dụ "She stayed resilient after every setback" là
+    /// nghĩa con người, còn "The material is resilient" là nghĩa vật lý.
+    /// Chỉ chấm khi tính từ đi sau một động từ nối và chủ ngữ là người.
+    /// </summary>
+    private static double SubjectSenseBoost(
+        string sentence, SenseCandidate candidate, string targetWord)
+    {
+        if (candidate.PartOfSpeech != "adjective")
+        {
+            return 0;
+        }
+
+        var tokens = TextUtil.Tokenize(sentence);
+        var targetTokens = TextUtil.Tokenize(targetWord);
+        if (tokens.Count == 0 || targetTokens.Count == 0)
+        {
+            return 0;
+        }
+
+        var index = -1;
+        for (var i = 0; i < tokens.Count; i++)
+        {
+            if (string.Equals(tokens[i], targetTokens[0], StringComparison.OrdinalIgnoreCase))
+            {
+                index = i;
+                break;
+            }
+        }
+
+        if (index < 1)
+        {
+            return 0;
+        }
+
+        var cursor = index - 1;
+        while (cursor >= 0 && Intensifiers.Contains(tokens[cursor]))
+        {
+            cursor--;
+        }
+
+        if (cursor < 0 || !LinkVerbs.Contains(tokens[cursor]))
+        {
+            return 0;
+        }
+
+        var personSubject = tokens
+            .Take(cursor)
+            .Any(token => PersonWords.Contains(token));
+        if (!personSubject)
+        {
+            return 0;
+        }
+
+        var definition = candidate.DefinitionEn.ToLowerInvariant();
+        var boost = 0d;
+        if (ContainsAny(definition, "person", "people", "someone", "human", "organism", "system"))
+        {
+            boost += 0.5;
+        }
+
+        if (ContainsAny(definition, "object", "substance", "material", "thing", "physical"))
+        {
+            boost -= 0.4;
+        }
+
+        return boost;
     }
 
     private static double LooksLikeTargetSense(string sentence, string targetWord, SenseCandidate candidate)

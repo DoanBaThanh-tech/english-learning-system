@@ -12,7 +12,9 @@ public sealed record UserProfileDto(
     string? LevelName,
     short DailyWordGoal,
     string TimeZoneId,
-    DateTime CreatedAt);
+    DateTime CreatedAt,
+    string? LearningPurpose,
+    string? ReferralSource);
 
 public sealed record UpdateProfileRequest(
     [Required(ErrorMessage = "Tên gọi là thông tin bắt buộc.")]
@@ -24,7 +26,8 @@ public sealed record UpdateProfileRequest(
     [MaxLength(500)] string? AvatarUrl,
     byte? CurrentLevelId,
     [Range(1, 500)] short? DailyWordGoal,
-    [MaxLength(64)] string? TimeZoneId);
+    [MaxLength(64)] string? TimeZoneId,
+    [MaxLength(40)] string? LearningPurpose);
 
 public sealed record TodayStatsDto(
     short WordsLearned,

@@ -520,7 +520,9 @@ public partial class AppDbContext : DbContext
             entity.Property(e => e.DisplayName).HasMaxLength(100);
             entity.Property(e => e.Email).HasMaxLength(256);
             entity.Property(e => e.IsActive).HasDefaultValue(true);
+            entity.Property(e => e.LearningPurpose).HasMaxLength(40);
             entity.Property(e => e.PasswordHash).HasMaxLength(255);
+            entity.Property(e => e.ReferralSource).HasMaxLength(40);
             entity.Property(e => e.TimeZoneId)
                 .HasMaxLength(64)
                 .HasDefaultValue("SE Asia Standard Time");

@@ -15,5 +15,7 @@ public static class UserMapper
         user.CurrentLevel?.Name,
         user.DailyWordGoal,
         user.TimeZoneId,
-        user.CreatedAt);
+        user.CreatedAt,
+        user.LearningPurpose,
+        user.ReferralSource);
 }

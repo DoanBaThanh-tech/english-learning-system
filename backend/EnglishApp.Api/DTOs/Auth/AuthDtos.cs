@@ -19,7 +19,9 @@ public sealed record RegisterRequest(
     string DisplayName,
     byte? CurrentLevelId = null,
     string? TimeZoneId = null,
-    [Range(1, 500)] short? DailyWordGoal = null);
+    [Range(1, 500)] short? DailyWordGoal = null,
+    [MaxLength(40)] string? LearningPurpose = null,
+    [MaxLength(40)] string? ReferralSource = null);
 
 public sealed record LoginRequest(
     [Required, EmailAddress] string Email,

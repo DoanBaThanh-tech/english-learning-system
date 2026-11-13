@@ -62,6 +62,9 @@ public sealed class UserService : IUserService
             }
         }
 
+        // Gán cả khi null để người dùng có thể bỏ chọn mục tiêu trong Hồ sơ.
+        user.LearningPurpose = OnboardingCodes.CleanPurpose(request.LearningPurpose);
+
         user.DisplayName = request.DisplayName.Trim();
         user.AvatarUrl = string.IsNullOrWhiteSpace(request.AvatarUrl) ? null : request.AvatarUrl.Trim();
 

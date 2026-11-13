@@ -285,13 +285,26 @@ public sealed class StudyService : IStudyService
             .FirstOrDefaultAsync(s => s.Id == sessionId && s.UserId == userId, ct)
             ?? throw new NotFoundException("Không tìm thấy phiên học.");
 
-        session.EndedAt ??= DateTime.UtcNow;
-        await _db.SaveChangesAsync(ct);
-
         var answers = await _db.StudyAnswers
             .AsNoTracking()
             .Where(a => a.SessionId == sessionId)
             .ToListAsync(ct);
+
+        // Phiên mở ra rồi đóng mà chưa trả lời câu nào thì không tính thời gian
+        // học và không giữ lại phiên rỗng trong lịch sử.
+        if (answers.Count == 0)
+        {
+            var endedAt = DateTime.UtcNow;
+            _db.StudySessions.Remove(session);
+            await _db.SaveChangesAsync(ct);
+            var startedAt = session.StartedAt;
+            return new StudySessionSummaryDto(
+                sessionId, session.Mode, startedAt, endedAt, 0, 0, 0, 0,
+                Array.Empty<int>());
+        }
+
+        session.EndedAt ??= DateTime.UtcNow;
+        await _db.SaveChangesAsync(ct);
 
         var minutes = Math.Max(1, (int)Math.Round((session.EndedAt.Value - session.StartedAt).TotalMinutes));
         await _progress.TouchAsync(userId, 0, 0, minutes, ct);

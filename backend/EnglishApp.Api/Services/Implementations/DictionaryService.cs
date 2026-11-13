@@ -103,7 +103,7 @@ public sealed class DictionaryService : IDictionaryService
             throw new BadRequestException("Cần nhập từ và câu ngữ cảnh.");
         }
 
-        var word = await FindLocalAsync(rawWord, ct) ?? await TryEnrichAsync(rawWord, ct);
+        var word = await ResolveContextWordAsync(rawWord, ct);
         var sentenceTranslation = request.TranslateSentence
             ? (await _translation.TranslateAsync(sentence, "en", "vi", ct))?.Text
             : null;
@@ -177,7 +177,7 @@ public sealed class DictionaryService : IDictionaryService
             .ToList();
 
         var aiResult = await _ai.TranslateInContextAsync(
-            word.Lemma, sentence, senses.Select(s => s.Definitions).ToList(), ct);
+            rawWord, sentence, senses.Select(s => s.Definitions).ToList(), ct);
 
         if (aiResult is not null && aiResult.ChosenSenseIndex >= 0 && aiResult.ChosenSenseIndex < senses.Count)
         {
@@ -196,7 +196,7 @@ public sealed class DictionaryService : IDictionaryService
                     s.Sense.PartOfSpeech?.Code ?? "phrase"))
                 .ToList();
 
-            var choice = SenseMatcher.Choose(sentence, candidateList, word.Lemma);
+            var choice = SenseMatcher.Choose(sentence, candidateList, rawWord);
             if (choice.Index >= 0)
             {
                 chosenSense = senses[choice.Index].Sense;
@@ -269,6 +269,37 @@ public sealed class DictionaryService : IDictionaryService
             meaning);
     }
 
+    /// <summary>
+    /// Tra theo ngữ cảnh ưu tiên dạng gốc của từ (booked -> book, manages -> manage)
+    /// để lemma sạch hơn và có đủ nghĩa động từ/danh từ. Từ gốc chỉ được ưu tiên
+    /// khi đã có trong DB hoặc bổ sung được; nếu không sẽ quay lại dạng gốc ban đầu.
+    /// </summary>
+    private async Task<Word?> ResolveContextWordAsync(string raw, CancellationToken ct)
+    {
+        var candidates = TextUtil.LemmaCandidates(raw).Distinct().ToList();
+        var ordered = candidates
+            .Where(c => !string.Equals(c, raw, StringComparison.OrdinalIgnoreCase))
+            .Concat(candidates.Where(c => string.Equals(c, raw, StringComparison.OrdinalIgnoreCase)))
+            .ToList();
+
+        foreach (var candidate in ordered)
+        {
+            var local = await _words.GetByLemmaAsync(candidate, ct);
+            if (local is not null)
+            {
+                return local;
+            }
+
+            var enriched = await TryEnrichAsync(candidate, ct);
+            if (enriched is not null)
+            {
+                return enriched;
+            }
+        }
+
+        return null;
+    }
+
     private async Task<Word?> FindLocalAsync(string raw, CancellationToken ct)
     {
         foreach (var candidate in TextUtil.LemmaCandidates(raw).Distinct())
@@ -325,10 +356,7 @@ public sealed class DictionaryService : IDictionaryService
             AudioUrl = uk?.Audio
         });
 
-        var definitions = external.Meanings
-            .SelectMany(m => m.Definitions.Select(d => new { Meaning = m, Definition = d }))
-            .Take(6)
-            .ToList();
+        var definitions = SelectDefinitions(external.Meanings, 8);
 
         var order = 1;
         foreach (var item in definitions)
@@ -400,6 +428,90 @@ public sealed class DictionaryService : IDictionaryService
             return await _words.GetByLemmaAsync(lemma, ct);
         }
     }
+
+    /// <summary>
+    /// Chọn nghĩa đa dạng theo từ loại thay vì lấy 6 định nghĩa đầu tiên.
+    /// Từ điển mở thường xếp rất nhiều nghĩa danh từ trước, nên nếu lấy tuần tự
+    /// một từ vừa là danh từ vừa là động từ sẽ mất hết nghĩa động từ —
+    /// đúng loại nghĩa mà tra theo ngữ cảnh cần nhất.
+    /// </summary>
+    private static List<(ExternalMeaning Meaning, ExternalDefinition Definition)> SelectDefinitions(
+        IReadOnlyList<ExternalMeaning> meanings, int limit)
+    {
+        var groups = meanings
+            .Where(m => m.Definitions.Count > 0)
+            .Select((m, order) => new
+            {
+                Meaning = m,
+                Pos = MapPartOfSpeech(m.PartOfSpeech),
+                Order = order
+            })
+            .OrderBy(g => PosPriority(g.Pos))
+            .ThenBy(g => g.Order)
+            .ToList();
+
+        var cursors = new int[groups.Count];
+        var taken = new int[groups.Count];
+        var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        var result = new List<(ExternalMeaning, ExternalDefinition)>();
+
+        bool TryTake(int groupIndex, int cap)
+        {
+            if (result.Count >= limit || groupIndex >= groups.Count) return false;
+
+            var group = groups[groupIndex];
+            if (taken[groupIndex] >= cap || cursors[groupIndex] >= group.Meaning.Definitions.Count)
+            {
+                return false;
+            }
+
+            var definition = group.Meaning.Definitions[cursors[groupIndex]++];
+            taken[groupIndex]++;
+            var key = TextUtil.Normalize(definition.Definition);
+            if (key.Length == 0 || !seen.Add(key))
+            {
+                return false;
+            }
+
+            result.Add((group.Meaning, definition));
+            return true;
+        }
+
+        // Vòng 1–3: mỗi từ loại lần lượt có 1, 2, 3 nghĩa để không bỏ sót
+        // tính từ/trạng từ khi từ đó chủ yếu là danh từ hoặc động từ.
+        for (var round = 1; round <= 3; round++)
+        {
+            for (var groupIndex = 0; groupIndex < groups.Count; groupIndex++)
+            {
+                TryTake(groupIndex, round);
+                if (result.Count >= limit) return result;
+            }
+        }
+
+        // Còn chỗ thì bổ sung thêm nghĩa cùng từ loại, ưu tiên động từ rồi danh từ.
+        var changed = true;
+        while (result.Count < limit && changed)
+        {
+            changed = false;
+            for (var groupIndex = 0; groupIndex < groups.Count; groupIndex++)
+            {
+                if (TryTake(groupIndex, 6)) changed = true;
+                if (result.Count >= limit) break;
+            }
+        }
+
+        return result;
+    }
+
+    private static int PosPriority(string pos) => pos switch
+    {
+        "verb" => 0,
+        "noun" => 1,
+        "adjective" => 2,
+        "adverb" => 3,
+        "phrase" => 4,
+        _ => 5
+    };
 
     private async Task<WordDto> MapWordAsync(int userId, Word word, CancellationToken ct)
     {

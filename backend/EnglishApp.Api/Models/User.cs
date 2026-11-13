@@ -21,6 +21,10 @@ public partial class User
 
     public string TimeZoneId { get; set; } = null!;
 
+    public string? LearningPurpose { get; set; }
+
+    public string? ReferralSource { get; set; }
+
     public DateTime CreatedAt { get; set; }
 
     public bool IsActive { get; set; }
