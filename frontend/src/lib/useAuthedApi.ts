@@ -7,14 +7,16 @@ export function useAuthedApi() {
   const navigate = useNavigate()
   const { session, refresh, logout, user } = useAuth()
 
+  const accessToken = session?.accessToken
+
   const run = useCallback(
     async <T,>(task: (token: string) => Promise<T>): Promise<T> => {
-      if (!session?.accessToken) {
+      if (!accessToken) {
         throw new ApiError('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.', 401)
       }
 
       try {
-        return await task(session.accessToken)
+        return await task(accessToken)
       } catch (caught) {
         if (caught instanceof ApiError && caught.status === 401) {
           try {
@@ -29,7 +31,7 @@ export function useAuthedApi() {
         throw caught
       }
     },
-    [session, refresh, logout, navigate, user?.email],
+    [accessToken, refresh, logout, navigate, user?.email],
   )
 
   return { run, session, user }

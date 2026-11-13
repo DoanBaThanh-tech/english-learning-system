@@ -1,5 +1,8 @@
+// Prompt SkyWorld dùng VITE_API_URL; giữ VITE_API_BASE_URL để tương thích cấu hình cũ.
 const API_BASE = (
-  (import.meta.env.VITE_API_BASE_URL as string | undefined) ?? 'http://localhost:5041'
+  (import.meta.env.VITE_API_URL as string | undefined) ??
+  (import.meta.env.VITE_API_BASE_URL as string | undefined) ??
+  'http://localhost:5041'
 ).replace(/\/+$/, '')
 
 export type UserProfile = {
@@ -351,7 +354,7 @@ async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
     })
   } catch {
     throw new ApiError(
-      'Không kết nối được máy chủ SkyWord. Kiểm tra API đang chạy ở cổng 5041 nhé.',
+      'Không kết nối được máy chủ SkyWorld. Kiểm tra API đang chạy ở cổng 5041 nhé.',
       0,
     )
   }
@@ -781,6 +784,343 @@ export function levelsRequest(accessToken: string): Promise<LevelRef[]> {
 
 export function skillsRequest(accessToken: string): Promise<SkillRef[]> {
   return request<SkillRef[]>('/api/reference/skills', {
+    headers: { Authorization: `Bearer ${accessToken}` },
+  })
+}
+
+/* ---------- Từ điển ---------- */
+
+export type DictExample = {
+  sentenceEn: string
+  sentenceVi: string | null
+}
+
+export type DictSense = {
+  id: number
+  partOfSpeech: string
+  partOfSpeechVi: string
+  levelCode: string | null
+  definitionEn: string
+  meaningVi: string
+  isVerified: boolean
+  examples: DictExample[]
+}
+
+export type DictWord = {
+  id: number
+  lemma: string
+  phoneticUs: string | null
+  phoneticUk: string | null
+  audioUs: string | null
+  audioUk: string | null
+  senses: DictSense[]
+  saved: boolean
+  userWordId: number | null
+}
+
+export type DictSearchItem = {
+  id: number
+  lemma: string
+  phonetic: string | null
+  meaning: string
+  partOfSpeech: string
+  levelCode: string | null
+}
+
+export type WordOfTheDay = {
+  date: string
+  word: DictWord
+  contextSentence: string
+  contextMeaning: string
+}
+
+export function searchWordsRequest(
+  accessToken: string,
+  query: string,
+  limit = 12,
+): Promise<DictSearchItem[]> {
+  return request<DictSearchItem[]>(
+    `/api/dictionary/search${toQuery({ q: query, limit })}`,
+    { headers: { Authorization: `Bearer ${accessToken}` } },
+  )
+}
+
+export function dictWordRequest(accessToken: string, lemma: string): Promise<DictWord> {
+  return request<DictWord>(`/api/dictionary/words/${encodeURIComponent(lemma)}`, {
+    headers: { Authorization: `Bearer ${accessToken}` },
+  })
+}
+
+export function wordOfTheDayRequest(accessToken: string): Promise<WordOfTheDay> {
+  return request<WordOfTheDay>('/api/dictionary/word-of-the-day', {
+    headers: { Authorization: `Bearer ${accessToken}` },
+  })
+}
+
+/* ---------- Trò chuyện ---------- */
+
+export type ChatScenario = {
+  id: number
+  levelId: number | null
+  levelCode: string | null
+  name: string
+}
+
+export type ChatSession = {
+  id: number
+  scenarioId: number | null
+  scenarioName: string | null
+  title: string | null
+  createdAt: string
+  messageCount: number
+  lastMessage: string | null
+  lastMessageAt: string | null
+}
+
+export type ChatMessage = {
+  id: number
+  role: string
+  content: string
+  correctedContent: string | null
+  createdAt: string
+}
+
+export type ChatSessionDetail = {
+  id: number
+  scenarioId: number | null
+  scenarioName: string | null
+  title: string | null
+  createdAt: string
+  messages: ChatMessage[]
+}
+
+export type ChatCorrection = {
+  original: string
+  correction: string
+  explanation: string
+}
+
+export type SendMessageResult = {
+  userMessage: ChatMessage
+  assistantMessage: ChatMessage
+  corrections: ChatCorrection[]
+  suggestedWords: string[]
+  aiUsed: boolean
+}
+
+export function chatScenariosRequest(accessToken: string): Promise<ChatScenario[]> {
+  return request<ChatScenario[]>('/api/chat/scenarios', {
+    headers: { Authorization: `Bearer ${accessToken}` },
+  })
+}
+
+export function chatSessionsRequest(accessToken: string): Promise<ChatSession[]> {
+  return request<ChatSession[]>('/api/chat/sessions', {
+    headers: { Authorization: `Bearer ${accessToken}` },
+  })
+}
+
+export function createChatSessionRequest(
+  accessToken: string,
+  input: { scenarioId?: number | null; title?: string | null },
+): Promise<ChatSession> {
+  return request<ChatSession>('/api/chat/sessions', {
+    method: 'POST',
+    body: JSON.stringify({
+      scenarioId: input.scenarioId ?? null,
+      title: input.title ?? null,
+    }),
+    headers: { Authorization: `Bearer ${accessToken}` },
+  })
+}
+
+export function chatSessionRequest(accessToken: string, id: number): Promise<ChatSessionDetail> {
+  return request<ChatSessionDetail>(`/api/chat/sessions/${id}`, {
+    headers: { Authorization: `Bearer ${accessToken}` },
+  })
+}
+
+export function deleteChatSessionRequest(accessToken: string, id: number): Promise<void> {
+  return request<void>(`/api/chat/sessions/${id}`, {
+    method: 'DELETE',
+    headers: { Authorization: `Bearer ${accessToken}` },
+  })
+}
+
+export function sendChatMessageRequest(
+  accessToken: string,
+  sessionId: number,
+  content: string,
+): Promise<SendMessageResult> {
+  return request<SendMessageResult>(`/api/chat/sessions/${sessionId}/messages`, {
+    method: 'POST',
+    body: JSON.stringify({ content }),
+    headers: { Authorization: `Bearer ${accessToken}` },
+  })
+}
+
+/* ---------- Phát âm ---------- */
+
+export type PhonemeScore = {
+  phoneme: string
+  score: number
+  feedback: string | null
+}
+
+export type SpeechWord = {
+  word: string
+  spoken: string
+  correct: boolean
+}
+
+export type PronunciationAttempt = {
+  id: number
+  referenceText: string
+  wordId: number | null
+  lemma: string | null
+  overallScore: number
+  audioUrl: string | null
+  createdAt: string
+  phonemes: PhonemeScore[]
+  words: SpeechWord[]
+  tips: string[]
+}
+
+export type PronunciationSummary = {
+  attempts: number
+  averageScore: number
+  bestScore: number
+  lastPracticedAt: string | null
+  focusTips: string[]
+}
+
+export function analyzePronunciationRequest(
+  accessToken: string,
+  input: {
+    referenceText: string
+    transcript: string
+    wordId?: number | null
+    audioUrl?: string | null
+  },
+): Promise<PronunciationAttempt> {
+  return request<PronunciationAttempt>('/api/pronunciation/analyze', {
+    method: 'POST',
+    body: JSON.stringify({
+      wordId: input.wordId ?? null,
+      referenceText: input.referenceText,
+      transcript: input.transcript,
+      audioUrl: input.audioUrl ?? null,
+    }),
+    headers: { Authorization: `Bearer ${accessToken}` },
+  })
+}
+
+export function pronunciationSummaryRequest(
+  accessToken: string,
+): Promise<PronunciationSummary> {
+  return request<PronunciationSummary>('/api/pronunciation/summary', {
+    headers: { Authorization: `Bearer ${accessToken}` },
+  })
+}
+
+/* ---------- Bài đọc ---------- */
+
+export type PassageSummary = {
+  id: number
+  title: string
+  topic: string | null
+  levelId: number
+  levelCode: string
+  levelName: string
+  wordCount: number
+  progressPct: number
+  lastReadAt: string | null
+  sourceId: number | null
+}
+
+export type PassageDetail = PassageSummary & {
+  body: string
+}
+
+export type LensSegment = {
+  text: string
+  isWord: boolean
+  wordId: number | null
+  userWordId: number | null
+  meaningVi: string | null
+}
+
+export type PassageLens = {
+  passageId: number
+  title: string
+  segments: LensSegment[]
+  savedWordCount: number
+}
+
+export function passagesRequest(
+  accessToken: string,
+  levelId?: number | null,
+): Promise<PassageSummary[]> {
+  return request<PassageSummary[]>(
+    `/api/reading/passages${toQuery({ levelId })}`,
+    { headers: { Authorization: `Bearer ${accessToken}` } },
+  )
+}
+
+export function passageRequest(accessToken: string, id: number): Promise<PassageDetail> {
+  return request<PassageDetail>(`/api/reading/passages/${id}`, {
+    headers: { Authorization: `Bearer ${accessToken}` },
+  })
+}
+
+export function createPassageRequest(
+  accessToken: string,
+  input: { title: string; body: string; levelId: number; topic?: string | null },
+): Promise<PassageDetail> {
+  return request<PassageDetail>('/api/reading/passages', {
+    method: 'POST',
+    body: JSON.stringify({
+      title: input.title,
+      body: input.body,
+      levelId: input.levelId,
+      topic: input.topic ?? null,
+    }),
+    headers: { Authorization: `Bearer ${accessToken}` },
+  })
+}
+
+export function updatePassageProgressRequest(
+  accessToken: string,
+  id: number,
+  progressPct: number,
+): Promise<void> {
+  return request<void>(`/api/reading/passages/${id}/progress`, {
+    method: 'PUT',
+    body: JSON.stringify({ progressPct }),
+    headers: { Authorization: `Bearer ${accessToken}` },
+  })
+}
+
+export function passageLensRequest(
+  accessToken: string,
+  id: number,
+): Promise<PassageLens> {
+  return request<PassageLens>(`/api/reading/passages/${id}/lens`, {
+    headers: { Authorization: `Bearer ${accessToken}` },
+  })
+}
+
+export function createChatScenarioRequest(
+  accessToken: string,
+  input: { name: string; systemPrompt: string; levelId?: number | null },
+): Promise<ChatScenario> {
+  return request<ChatScenario>('/api/chat/scenarios', {
+    method: 'POST',
+    body: JSON.stringify({
+      name: input.name,
+      systemPrompt: input.systemPrompt,
+      levelId: input.levelId ?? null,
+    }),
     headers: { Authorization: `Bearer ${accessToken}` },
   })
 }

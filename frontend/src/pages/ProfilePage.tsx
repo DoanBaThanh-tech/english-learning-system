@@ -1,22 +1,22 @@
 import { useEffect, useMemo, useState, type FormEvent } from 'react'
 import { Link } from 'react-router-dom'
-import { AppScaffold } from '../components/AppScaffold'
+import { Button } from '../components/ui/Button'
+import { Card } from '../components/ui/Card'
+import { Chip } from '../components/ui/Chip'
+import { FeedbackBar } from '../components/ui/FeedbackBar'
+import { Input } from '../components/ui/Input'
 import {
   BookmarkIcon,
   CalendarIcon,
   CheckIcon,
   FlameIcon,
   GraduationIcon,
-  MailIcon,
-  ShieldIcon,
   SparkIcon,
   TargetIcon,
   TrophyIcon,
   UserIcon,
 } from '../components/Icons'
-import { PasswordField } from '../components/PasswordField'
 import {
-  ApiError,
   changePasswordRequest,
   dashboardRequest,
   levelsRequest,
@@ -27,8 +27,12 @@ import {
   type UserProfile,
 } from '../lib/api'
 import { useAuth } from '../lib/AuthContext'
-import { PURPOSE_OPTIONS, purposeInfo, sourceLabel } from '../lib/personalization'
 import { useAuthedApi } from '../lib/useAuthedApi'
+import {
+  PURPOSE_OPTIONS,
+  buildProgram,
+  sourceLabel,
+} from '../lib/personalization'
 import '../styles/profile.css'
 
 const TIMEZONES = [
@@ -42,13 +46,12 @@ const TIMEZONES = [
   { id: 'GMT Standard Time', label: 'London · UTC+0' },
   { id: 'Central Europe Standard Time', label: 'Trung Âu · UTC+1' },
   { id: 'Eastern Standard Time', label: 'New York · UTC-5' },
-  { id: 'Pacific Standard Time', label: 'Los Angeles · UTC-8' },
 ]
 
-const GOAL_OPTIONS = [10, 20, 30, 50, 80]
+const GOALS = [10, 20, 30, 50, 80]
 const NAME_PATTERN = /^[\p{L}\p{M}]+(?: [\p{L}\p{M}]+)*$/u
 
-type ProfileForm = {
+type FormState = {
   displayName: string
   avatarUrl: string
   levelId: number
@@ -57,7 +60,7 @@ type ProfileForm = {
   timeZoneId: string
 }
 
-function toForm(profile: UserProfile): ProfileForm {
+function toForm(profile: UserProfile): FormState {
   return {
     displayName: profile.displayName,
     avatarUrl: profile.avatarUrl ?? '',
@@ -68,31 +71,15 @@ function toForm(profile: UserProfile): ProfileForm {
   }
 }
 
-function formatDate(value: string): string {
-  const date = new Date(value)
-  if (Number.isNaN(date.getTime())) return '—'
-  return new Intl.DateTimeFormat('vi-VN', {
-    day: '2-digit',
-    month: 'long',
-    year: 'numeric',
-  }).format(date)
-}
-
-function levelLabel(profile: UserProfile): string {
-  if (profile.levelCode && profile.levelName) return `${profile.levelCode} · ${profile.levelName}`
-  return 'Chưa chọn trình độ'
-}
-
 export function ProfilePage() {
   const { run } = useAuthedApi()
   const { updateUser } = useAuth()
-
   const [profile, setProfile] = useState<UserProfile | null>(null)
   const [dashboard, setDashboard] = useState<Dashboard | null>(null)
   const [levels, setLevels] = useState<LevelRef[]>([])
-  const [form, setForm] = useState<ProfileForm | null>(null)
+  const [form, setForm] = useState<FormState | null>(null)
   const [loading, setLoading] = useState(true)
-  const [error, setError] = useState('')
+  const [loadError, setLoadError] = useState('')
   const [saving, setSaving] = useState(false)
   const [saveError, setSaveError] = useState('')
   const [success, setSuccess] = useState('')
@@ -103,14 +90,12 @@ export function ProfilePage() {
   const [confirmPassword, setConfirmPassword] = useState('')
   const [passwordError, setPasswordError] = useState('')
   const [passwordSuccess, setPasswordSuccess] = useState('')
-  const [changingPassword, setChangingPassword] = useState(false)
+  const [changing, setChanging] = useState(false)
 
   useEffect(() => {
     let active = true
-
     async function load() {
       setLoading(true)
-      setError('')
       try {
         const [nextProfile, nextLevels, nextDashboard] = await Promise.all([
           run((token) => profileRequest(token)),
@@ -122,117 +107,84 @@ export function ProfilePage() {
         setLevels(nextLevels)
         setDashboard(nextDashboard)
         setForm(toForm(nextProfile))
-        setAvatarBroken(false)
       } catch (caught) {
-        if (!active) return
-        if (caught instanceof ApiError && caught.status === 401) return
-        setError(
-          caught instanceof ApiError
-            ? caught.message
-            : 'Chưa tải được hồ sơ. Vui lòng thử lại.',
-        )
+        if (active) setLoadError(caught instanceof Error ? caught.message : 'Chưa tải được hồ sơ.')
       } finally {
         if (active) setLoading(false)
       }
     }
-
-    void load()
+    load()
     return () => {
       active = false
     }
   }, [run])
 
-  const displayName = profile?.displayName.trim() || 'bạn'
-  const initial = displayName.charAt(0).toUpperCase()
+  const program = useMemo(
+    () =>
+      buildProgram(
+        levels.find((level) => level.id === form?.levelId)?.code ?? profile?.levelCode,
+        levels.find((level) => level.id === form?.levelId)?.name ?? profile?.levelName,
+        form?.purpose,
+      ),
+    [form?.levelId, form?.purpose, levels, profile?.levelCode, profile?.levelName],
+  )
 
-  const timezoneOptions = useMemo(() => {
-    if (!profile) return TIMEZONES
-    return TIMEZONES.some((zone) => zone.id === profile.timeZoneId)
-      ? TIMEZONES
-      : [{ id: profile.timeZoneId, label: profile.timeZoneId }, ...TIMEZONES]
-  }, [profile])
-
-  const goalOptions = useMemo(() => {
-    if (!form) return GOAL_OPTIONS
-    return GOAL_OPTIONS.includes(form.goal)
-      ? GOAL_OPTIONS
-      : [...GOAL_OPTIONS, form.goal].sort((a, b) => a - b)
-  }, [form])
-
-  const purposePreview = purposeInfo(form?.purpose ?? null)
-
-  function patchForm(patch: Partial<ProfileForm>) {
-    setForm((current) => (current ? { ...current, ...patch } : current))
+  function patch(patchValue: Partial<FormState>) {
+    setForm((current) => (current ? { ...current, ...patchValue } : current))
     setSaveError('')
     setSuccess('')
   }
 
-  async function handleSave(event: FormEvent) {
+  async function save(event: FormEvent) {
     event.preventDefault()
-    if (!form || !profile) return
-
-    const cleanName = form.displayName.trim()
-    if (cleanName.length < 2 || cleanName.length > 30) {
+    if (!form) return
+    const name = form.displayName.trim()
+    if (name.length < 2 || name.length > 30) {
       setSaveError('Tên gọi cần từ 2 đến 30 ký tự.')
       return
     }
-    if (!NAME_PATTERN.test(cleanName)) {
-      setSaveError('Tên gọi chỉ được chứa chữ cái và khoảng trắng, không có số hoặc ký tự đặc biệt.')
+    if (!NAME_PATTERN.test(name)) {
+      setSaveError('Tên gọi chỉ gồm chữ cái và khoảng trắng, không có số/ký tự đặc biệt.')
       return
     }
-    const avatar = form.avatarUrl.trim()
-    if (avatar.length > 0 && !/^https?:\/\//i.test(avatar)) {
+    if (form.avatarUrl && !/^https?:\/\//i.test(form.avatarUrl.trim())) {
       setSaveError('Ảnh đại diện cần là đường dẫn http(s) hợp lệ hoặc để trống.')
-      return
-    }
-    if (!Number.isFinite(form.goal) || form.goal < 1 || form.goal > 500) {
-      setSaveError('Mục tiêu từ/ngày cần nằm trong khoảng 1 đến 500.')
       return
     }
     if (!form.levelId) {
       setSaveError('Chọn trình độ hiện tại của bạn.')
       return
     }
-
     setSaving(true)
-    setSaveError('')
-    setSuccess('')
-
     try {
       const updated = await run((token) =>
         updateProfileRequest(token, {
-          displayName: cleanName,
-          avatarUrl: avatar.length > 0 ? avatar : null,
+          displayName: name,
+          avatarUrl: form.avatarUrl.trim() || null,
           currentLevelId: form.levelId,
           dailyWordGoal: form.goal,
           timeZoneId: form.timeZoneId,
-          learningPurpose: form.purpose.length > 0 ? form.purpose : null,
+          learningPurpose: form.purpose || null,
         }),
       )
       setProfile(updated)
       setForm(toForm(updated))
-      setAvatarBroken(false)
       updateUser(updated)
-      setSuccess('Đã lưu hồ sơ. Tên gọi và mục tiêu mới sẽ hiển thị trên trang chủ.')
+      setSuccess('Đã lưu hồ sơ. Lộ trình và gợi ý sẽ cập nhật ngay.')
+      setAvatarBroken(false)
     } catch (caught) {
-      if (caught instanceof ApiError && caught.status === 401) return
-      setSaveError(
-        caught instanceof ApiError
-          ? caught.message
-          : 'Chưa lưu được hồ sơ. Vui lòng thử lại.',
-      )
+      setSaveError(caught instanceof Error ? caught.message : 'Chưa lưu được hồ sơ.')
     } finally {
       setSaving(false)
     }
   }
 
-  async function handleChangePassword(event: FormEvent) {
+  async function changePassword(event: FormEvent) {
     event.preventDefault()
     setPasswordError('')
     setPasswordSuccess('')
-
     if (newPassword.length < 8 || newPassword.length > 20) {
-      setPasswordError('Mật khẩu mới cần từ 8 đến 20 ký tự.')
+      setPasswordError('Mật khẩu mới cần 8–20 ký tự.')
       return
     }
     if (!/[^A-Za-z0-9\s]/.test(newPassword)) {
@@ -240,289 +192,172 @@ export function ProfilePage() {
       return
     }
     if (newPassword !== confirmPassword) {
-      setPasswordError('Mật khẩu nhập lại chưa khớp.')
+      setPasswordError('Hai mật khẩu chưa khớp.')
       return
     }
-    if (newPassword === currentPassword) {
-      setPasswordError('Mật khẩu mới phải khác mật khẩu hiện tại.')
-      return
-    }
-
-    setChangingPassword(true)
+    setChanging(true)
     try {
       await run((token) => changePasswordRequest(token, currentPassword, newPassword))
       setCurrentPassword('')
       setNewPassword('')
       setConfirmPassword('')
-      setPasswordSuccess(
-        'Đã đổi mật khẩu. Các phiên đăng nhập khác đã được thu hồi; phiên hiện tại vẫn dùng được đến khi hết hạn.',
-      )
+      setPasswordSuccess('Đã đổi mật khẩu. Các phiên khác đã được thu hồi.')
     } catch (caught) {
-      if (caught instanceof ApiError && caught.status === 401) return
-      setPasswordError(
-        caught instanceof ApiError
-          ? caught.message
-          : 'Chưa đổi được mật khẩu. Vui lòng thử lại.',
-      )
+      setPasswordError(caught instanceof Error ? caught.message : 'Chưa đổi được mật khẩu.')
     } finally {
-      setChangingPassword(false)
+      setChanging(false)
     }
   }
 
-  const today = dashboard?.today
-  const goal = Math.max(1, today?.dailyGoal ?? profile?.dailyWordGoal ?? 20)
-  const learned = today?.wordsLearned ?? 0
+  const displayName = profile?.displayName ?? 'bạn'
+  const initial = displayName.trim().charAt(0).toUpperCase()
+  const goal = dashboard?.today.dailyGoal ?? profile?.dailyWordGoal ?? 20
+  const learned = dashboard?.today.wordsLearned ?? 0
   const goalPct = Math.min(100, Math.round((learned / goal) * 100))
 
   return (
-    <AppScaffold className="profile-page">
-      <section className="page-hero site-shell">
-        <div className="page-hero__copy">
-          <span className="page-eyebrow">
-            <UserIcon size={14} />
-            Hồ sơ học tập
-          </span>
-          <h1>
-            Một hồ sơ,
-            <br />
-            <em>đúng cách bạn học.</em>
-          </h1>
-          <p>
-            Điều chỉnh tên gọi, trình độ, mục tiêu từ vựng và múi giờ để SkyWord
-            nhắc bạn đúng lúc — mọi dữ liệu học tập vẫn nằm trong tài khoản của bạn.
-          </p>
+    <div className="profile">
+      <header className="page-head">
+        <div className="page-head__copy">
+          <span className="eyebrow"><UserIcon size={14} /> Hồ sơ</span>
+          <h1>Cách SkyWorld gọi bạn</h1>
+          <p>Điều chỉnh mục tiêu học, trình độ và nhịp nhắc việc.</p>
         </div>
-        <div className="page-hero__actions">
-          <Link to="/app" className="page-btn">
-            Về trang chủ
-          </Link>
-          <Link to="/app/words" className="page-btn page-btn--primary">
-            <BookmarkIcon size={16} />
-            Mở sổ từ
-          </Link>
+        <div className="page-head__actions">
+          <Link to="/app" className="btn btn--sec btn--sm">Về trang Học</Link>
         </div>
-      </section>
+      </header>
 
-      <div className="site-shell">
-        {loading ? (
-          <div className="page-state" aria-live="polite">
-            <span className="spinner spinner--page" aria-hidden="true" />
-            <p>Đang mở hồ sơ của bạn...</p>
-          </div>
-        ) : error ? (
-          <div className="page-state" role="alert">
-            <span className="page-state__icon">
-              <UserIcon size={22} />
-            </span>
-            <h2>Chưa tải được hồ sơ</h2>
-            <p className="page-error">{error}</p>
-            <div className="page-state__actions">
-              <button type="button" className="page-btn page-btn--primary" onClick={() => window.location.reload()}>
-                Thử lại
-              </button>
-            </div>
-          </div>
-        ) : profile && form ? (
-          <div className="profile-layout">
-            <aside className="profile-id page-card">
-              <div className="profile-id__top">
-                <div className="profile-avatar">
-                  {form.avatarUrl && !avatarBroken ? (
-                    <img
-                      src={form.avatarUrl}
-                      alt=""
-                      onError={() => setAvatarBroken(true)}
-                    />
-                  ) : (
-                    <span>{initial}</span>
-                  )}
-                  <span className="profile-avatar__ring" aria-hidden="true" />
-                </div>
-                <span className="profile-id__level">
-                  <GraduationIcon size={14} />
-                  {levelLabel(profile)}
-                </span>
-                <h2>{displayName}</h2>
-                <p className="profile-id__email">
-                  <MailIcon size={14} />
-                  {profile.email}
-                </p>
-                <p className="profile-id__joined">
-                  <CalendarIcon size={14} />
-                  Thành viên từ {formatDate(profile.createdAt)}
-                </p>
-                {profile.referralSource ? (
-                  <p className="profile-id__joined">
-                    <SparkIcon size={14} />
-                    Biết SkyWord qua {sourceLabel(profile.referralSource)}
-                  </p>
-                ) : null}
+      {loading ? (
+        <Card><div className="skeleton" style={{ height: 260 }} /></Card>
+      ) : loadError ? (
+        <FeedbackBar tone="bad" action={<Button size="sm" variant="secondary" onClick={() => window.location.reload()}>Thử lại</Button>}>
+          {loadError}
+        </FeedbackBar>
+      ) : profile && form ? (
+        <div className="profile__layout">
+          <aside className="page-stack">
+            <Card className="profile-id">
+              <div className="profile-avatar">
+                {form.avatarUrl && !avatarBroken ? (
+                  <img src={form.avatarUrl} alt="" onError={() => setAvatarBroken(true)} />
+                ) : (
+                  <span>{initial}</span>
+                )}
               </div>
-
+              <h2>{displayName}</h2>
+              <p className="profile-id__email">{profile.email}</p>
+              <div className="profile-id__meta">
+                <Chip tone="gold"><GraduationIcon size={11} /> {profile.levelCode ?? 'Chưa chọn'} · {profile.levelName ?? 'Trình độ'}</Chip>
+                <Chip tone="line"><CalendarIcon size={11} /> Từ {new Date(profile.createdAt).toLocaleDateString('vi-VN')}</Chip>
+                {profile.referralSource ? <Chip tone="line"><SparkIcon size={11} /> {sourceLabel(profile.referralSource)}</Chip> : null}
+              </div>
               <div className="profile-goal">
                 <div className="profile-goal__ring" aria-hidden="true">
                   <svg viewBox="0 0 120 120">
-                    <circle className="profile-goal__track" cx="60" cy="60" r="48" pathLength={100} />
-                    <circle
-                      className="profile-goal__value"
-                      cx="60"
-                      cy="60"
-                      r="48"
-                      pathLength={100}
-                      strokeDasharray="100"
-                      strokeDashoffset={100 - goalPct}
-                    />
+                    <circle className="profile-goal__track" cx="60" cy="60" r="50" pathLength={100} />
+                    <circle className="profile-goal__value" cx="60" cy="60" r="50" pathLength={100} strokeDasharray="100" strokeDashoffset={100 - goalPct} />
                   </svg>
-                  <span>
-                    <strong>{learned}</strong>
-                    <em>/{goal}</em>
-                  </span>
+                  <span><strong>{learned}</strong><em>/{goal}</em></span>
                 </div>
                 <div>
-                  <span className="page-card__eyebrow">Hôm nay</span>
-                  <strong className="profile-goal__title">
-                    {goalPct >= 100 ? 'Mục tiêu đã đạt' : `Còn ${Math.max(0, goal - learned)} từ`}
-                  </strong>
-                  <p>Mục tiêu {profile.dailyWordGoal} từ/ngày · {goalPct}%</p>
+                  <span className="card__eyebrow">Hôm nay</span>
+                  <strong className="profile-goal__title">{goalPct >= 100 ? 'Đã đạt mục tiêu' : `Còn ${Math.max(0, goal - learned)} từ`}</strong>
+                  <p>{goalPct}% mục tiêu ngày</p>
                 </div>
               </div>
-
-              <div className="profile-snapshot">
-                <div>
-                  <FlameIcon size={16} />
-                  <strong>{dashboard?.streakDays ?? 0}</strong>
-                  <span>ngày liên tiếp</span>
-                </div>
-                <div>
-                  <BookmarkIcon size={16} />
-                  <strong>{dashboard?.totalWords ?? 0}</strong>
-                  <span>từ trong sổ</span>
-                </div>
-                <div>
-                  <TrophyIcon size={16} />
-                  <strong>{dashboard?.masteredWords ?? 0}</strong>
-                  <span>từ đã thuộc</span>
-                </div>
-                <div>
-                  <TargetIcon size={16} />
-                  <strong>{dashboard?.dueCount ?? 0}</strong>
-                  <span>cần ôn hôm nay</span>
-                </div>
+              <div className="profile-stats">
+                <span><FlameIcon size={14} /><strong>{dashboard?.streakDays ?? 0}</strong> ngày</span>
+                <span><BookmarkIcon size={14} /><strong>{dashboard?.totalWords ?? 0}</strong> từ</span>
+                <span><TrophyIcon size={14} /><strong>{dashboard?.masteredWords ?? 0}</strong> thuộc</span>
+                <span><TargetIcon size={14} /><strong>{dashboard?.dueCount ?? 0}</strong> cần ôn</span>
               </div>
-            </aside>
+            </Card>
 
-            <div className="profile-panels">
-              <form className="page-card profile-form" onSubmit={handleSave}>
-                <div className="page-card__head">
+            <Card sky className="profile-program">
+              <span className="card__eyebrow"><SparkIcon size={13} /> Lộ trình gợi ý</span>
+              <h2>{program.title}</h2>
+              <p>{program.tagline}</p>
+              <div className="profile-program__steps">
+                {program.steps.map((step) => (
+                  <span key={step}><CheckIcon size={11} /> {step}</span>
+                ))}
+              </div>
+              <div className="profile-program__meta">
+                <span>{program.goal} từ/ngày</span>
+                <span>{program.minutes} phút/ngày</span>
+                <span>{program.days} ngày/chặng</span>
+              </div>
+            </Card>
+          </aside>
+
+          <div className="page-stack">
+            <form onSubmit={save} className="page-stack">
+              <Card>
+                <div className="card__head">
                   <div>
-                    <span className="page-card__eyebrow">Thông tin học tập</span>
-                    <h2>Cách SkyWord gọi bạn</h2>
+                    <span className="card__eyebrow">Thông tin học tập</span>
+                    <h2 className="card__title">Hồ sơ của bạn</h2>
                   </div>
-                  <span className="profile-form__mark">
-                    <SparkIcon size={16} />
-                  </span>
+                  <UserIcon size={18} />
                 </div>
 
-                <div className="profile-fields">
-                  <label className="profile-field" htmlFor="profile-name">
-                    <span>Tên gọi</span>
-                    <input
-                      id="profile-name"
-                      value={form.displayName}
-                      maxLength={30}
-                      onChange={(event) => patchForm({ displayName: event.target.value })}
-                      placeholder="Tên của bạn"
-                      autoComplete="name"
-                    />
-                    <em>Chỉ chữ cái và khoảng trắng, tối đa 30 ký tự.</em>
-                  </label>
-
-                  <label className="profile-field" htmlFor="profile-avatar">
-                    <span>Ảnh đại diện (đường dẫn)</span>
-                    <input
-                      id="profile-avatar"
-                      value={form.avatarUrl}
-                      maxLength={500}
-                      onChange={(event) => {
-                        patchForm({ avatarUrl: event.target.value })
-                        setAvatarBroken(false)
-                      }}
-                      placeholder="https://..."
-                      autoComplete="url"
-                    />
-                    <em>Để trống để dùng chữ cái đầu của tên.</em>
-                  </label>
-
-                  <label className="profile-field" htmlFor="profile-level">
-                    <span>Trình độ hiện tại</span>
-                    <span className="profile-select">
-                      <select
-                        id="profile-level"
-                        value={form.levelId}
-                        onChange={(event) => patchForm({ levelId: Number(event.target.value) })}
-                      >
-                        <option value={0} disabled>
-                          Chọn trình độ
-                        </option>
-                        {levels.map((level) => (
-                          <option key={level.id} value={level.id}>
-                            {level.code} · {level.name}
-                          </option>
-                        ))}
-                      </select>
-                    </span>
-                    <em>Dùng để gợi ý lộ trình và bài đọc phù hợp.</em>
-                  </label>
-
-                  <label className="profile-field" htmlFor="profile-purpose">
-                    <span>Mục tiêu học tiếng Anh</span>
-                    <span className="profile-select">
-                      <select
-                        id="profile-purpose"
-                        value={form.purpose}
-                        onChange={(event) => patchForm({ purpose: event.target.value })}
-                      >
-                        <option value="">Chọn mục tiêu</option>
-                        {PURPOSE_OPTIONS.map((option) => (
-                          <option key={option.code} value={option.code}>
-                            {option.label}
-                          </option>
-                        ))}
-                      </select>
-                    </span>
-                    <em>Quyết định chương trình và kỹ năng ưu tiên trên trang chủ.</em>
-                  </label>
-
-                  <label className="profile-field" htmlFor="profile-timezone">
-                    <span>Múi giờ</span>
-                    <span className="profile-select">
-                      <select
-                        id="profile-timezone"
-                        value={form.timeZoneId}
-                        onChange={(event) => patchForm({ timeZoneId: event.target.value })}
-                      >
-                        {timezoneOptions.map((zone) => (
-                          <option key={zone.id} value={zone.id}>
-                            {zone.label}
-                          </option>
-                        ))}
-                      </select>
-                    </span>
-                    <em>Dùng để tính “hôm nay”, chuỗi ngày và lịch ôn.</em>
-                  </label>
-                </div>
-
-                {purposePreview ? (
-                  <div className="profile-purpose-note">
-                    <span className="profile-purpose-note__icon">
-                      <TargetIcon size={15} />
-                    </span>
-                    <div>
-                      <strong>{purposePreview.program}</strong>
-                      <span>{purposePreview.tagline}</span>
-                    </div>
+                <div className="page-grid">
+                  <Input
+                    label="Tên gọi"
+                    value={form.displayName}
+                    onChange={(event) => patch({ displayName: event.target.value })}
+                    maxLength={30}
+                    placeholder="Tên của bạn"
+                  />
+                  <Input
+                    label="Ảnh đại diện (URL)"
+                    value={form.avatarUrl}
+                    onChange={(event) => {
+                      patch({ avatarUrl: event.target.value })
+                      setAvatarBroken(false)
+                    }}
+                    placeholder="https://..."
+                  />
+                  <div className="field">
+                    <label htmlFor="profile-level">Trình độ hiện tại</label>
+                    <select
+                      id="profile-level"
+                      value={form.levelId}
+                      onChange={(event) => patch({ levelId: Number(event.target.value) })}
+                    >
+                      <option value={0} disabled>Chọn trình độ</option>
+                      {levels.map((level) => (
+                        <option key={level.id} value={level.id}>{level.code} · {level.name}</option>
+                      ))}
+                    </select>
                   </div>
-                ) : null}
+                  <div className="field">
+                    <label htmlFor="profile-purpose">Mục tiêu học</label>
+                    <select
+                      id="profile-purpose"
+                      value={form.purpose}
+                      onChange={(event) => patch({ purpose: event.target.value })}
+                    >
+                      <option value="">Chọn mục tiêu</option>
+                      {PURPOSE_OPTIONS.map((option) => (
+                        <option key={option.code} value={option.code}>{option.label}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="field">
+                    <label htmlFor="profile-timezone">Múi giờ</label>
+                    <select
+                      id="profile-timezone"
+                      value={form.timeZoneId}
+                      onChange={(event) => patch({ timeZoneId: event.target.value })}
+                    >
+                      {TIMEZONES.map((zone) => (
+                        <option key={zone.id} value={zone.id}>{zone.label}</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
 
                 <div className="profile-goal-picker">
                   <div className="profile-goal-picker__head">
@@ -530,14 +365,14 @@ export function ProfilePage() {
                     <strong>{form.goal} từ</strong>
                   </div>
                   <div className="profile-goal-picker__options">
-                    {goalOptions.map((option) => (
+                    {GOALS.map((value) => (
                       <button
-                        key={option}
+                        key={value}
                         type="button"
-                        className={form.goal === option ? 'is-active' : ''}
-                        onClick={() => patchForm({ goal: option })}
+                        className={form.goal === value ? 'is-active' : ''}
+                        onClick={() => patch({ goal: value })}
                       >
-                        {option}
+                        {value}
                       </button>
                     ))}
                   </div>
@@ -545,142 +380,78 @@ export function ProfilePage() {
                     type="range"
                     min={1}
                     max={100}
-                    step={1}
                     value={Math.min(100, Math.max(1, form.goal))}
-                    onChange={(event) => patchForm({ goal: Number(event.target.value) })}
+                    onChange={(event) => patch({ goal: Number(event.target.value) })}
                     aria-label="Mục tiêu từ mỗi ngày"
                   />
-                  <p>Bạn có thể chọn nhanh hoặc kéo thanh để đặt mục tiêu riêng.</p>
                 </div>
 
-                {saveError ? (
-                  <p className="profile-alert profile-alert--error" role="alert">
-                    {saveError}
-                  </p>
-                ) : null}
-                {success ? (
-                  <p className="profile-alert profile-alert--success" role="status">
-                    <CheckIcon size={15} />
-                    {success}
-                  </p>
-                ) : null}
+                {saveError ? <FeedbackBar tone="bad">{saveError}</FeedbackBar> : null}
+                {success ? <FeedbackBar tone="ok">{success}</FeedbackBar> : null}
 
                 <div className="profile-form__actions">
-                  <button
-                    type="submit"
-                    className="page-btn page-btn--primary"
-                    disabled={saving}
-                  >
-                    {saving ? (
-                      <>
-                        <span className="spinner" aria-hidden="true" />
-                        Đang lưu...
-                      </>
-                    ) : (
-                      <>
-                        <CheckIcon size={16} />
-                        Lưu hồ sơ
-                      </>
-                    )}
-                  </button>
-                  <button
-                    type="button"
-                    className="page-btn"
+                  <Button type="submit" disabled={saving}>
+                    {saving ? <span className="spinner" /> : <CheckIcon size={15} />}
+                    {saving ? 'Đang lưu...' : 'Lưu hồ sơ'}
+                  </Button>
+                  <Button
+                    variant="secondary"
                     onClick={() => {
-                      setForm(toForm(profile))
+                      if (profile) setForm(toForm(profile))
                       setSaveError('')
                       setSuccess('')
-                      setAvatarBroken(false)
                     }}
                   >
                     Hoàn tác
-                  </button>
+                  </Button>
                 </div>
-              </form>
+              </Card>
+            </form>
 
-              <form className="page-card profile-security" onSubmit={handleChangePassword}>
-                <div className="page-card__head">
-                  <div>
-                    <span className="page-card__eyebrow">Bảo mật</span>
-                    <h2>Đổi mật khẩu</h2>
-                  </div>
-                  <span className="profile-form__mark profile-form__mark--shield">
-                    <ShieldIcon size={17} />
-                  </span>
+            <Card className="profile-password">
+              <div className="card__head">
+                <div>
+                  <span className="card__eyebrow">Bảo mật</span>
+                  <h2 className="card__title">Đổi mật khẩu</h2>
                 </div>
-
-                <div className="profile-fields">
-                  <PasswordField
-                    id="profile-current-password"
-                    label="Mật khẩu hiện tại"
-                    value={currentPassword}
-                    onChange={setCurrentPassword}
-                    autoComplete="current-password"
-                    maxLength={100}
-                  />
-                  <PasswordField
-                    id="profile-new-password"
+                <Chip tone="line">8–20 ký tự</Chip>
+              </div>
+              <form onSubmit={changePassword} className="page-stack">
+                <Input
+                  label="Mật khẩu hiện tại"
+                  type="password"
+                  value={currentPassword}
+                  onChange={(event) => setCurrentPassword(event.target.value)}
+                  autoComplete="current-password"
+                />
+                <div className="page-grid">
+                  <Input
                     label="Mật khẩu mới"
+                    type="password"
                     value={newPassword}
-                    onChange={setNewPassword}
+                    onChange={(event) => setNewPassword(event.target.value)}
                     autoComplete="new-password"
-                    placeholder="8–20 ký tự, có ký tự đặc biệt"
-                    maxLength={20}
+                    hint="8–20 ký tự, có ký tự đặc biệt."
                   />
-                  <PasswordField
-                    id="profile-confirm-password"
+                  <Input
                     label="Nhập lại mật khẩu mới"
+                    type="password"
                     value={confirmPassword}
-                    onChange={setConfirmPassword}
+                    onChange={(event) => setConfirmPassword(event.target.value)}
                     autoComplete="new-password"
-                    maxLength={20}
                   />
                 </div>
-
-                {passwordError ? (
-                  <p className="profile-alert profile-alert--error" role="alert">
-                    {passwordError}
-                  </p>
-                ) : null}
-                {passwordSuccess ? (
-                  <p className="profile-alert profile-alert--success" role="status">
-                    <CheckIcon size={15} />
-                    {passwordSuccess}
-                  </p>
-                ) : null}
-
-                <div className="profile-form__actions">
-                  <button
-                    type="submit"
-                    className="page-btn page-btn--primary"
-                    disabled={
-                      changingPassword ||
-                      !currentPassword ||
-                      !newPassword ||
-                      !confirmPassword
-                    }
-                  >
-                    {changingPassword ? (
-                      <>
-                        <span className="spinner" aria-hidden="true" />
-                        Đang đổi...
-                      </>
-                    ) : (
-                      <>
-                        <ShieldIcon size={16} />
-                        Đổi mật khẩu
-                      </>
-                    )}
-                  </button>
-                  <span className="profile-security__note">
-                    Đổi mật khẩu sẽ thu hồi các phiên đăng nhập khác.
-                  </span>
-                </div>
+                {passwordError ? <FeedbackBar tone="bad">{passwordError}</FeedbackBar> : null}
+                {passwordSuccess ? <FeedbackBar tone="ok">{passwordSuccess}</FeedbackBar> : null}
+                <Button type="submit" variant="secondary" disabled={changing || !currentPassword || !newPassword || !confirmPassword}>
+                  {changing ? <span className="spinner" /> : null}
+                  {changing ? 'Đang đổi...' : 'Đổi mật khẩu'}
+                </Button>
               </form>
-            </div>
+            </Card>
           </div>
-        ) : null}
-      </div>
-    </AppScaffold>
+        </div>
+      ) : null}
+    </div>
   )
 }

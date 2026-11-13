@@ -1,146 +1,91 @@
-import { useState, type FormEvent, type KeyboardEvent } from 'react'
+import { useEffect, useState, type FormEvent } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
-import { AuthLayout } from '../components/AuthLayout'
-import {
-  ArrowRightIcon,
-  CheckIcon,
-  MailIcon,
-  SparkIcon,
-} from '../components/Icons'
-import { PasswordField } from '../components/PasswordField'
+import { AuthShell } from '../components/layout/AuthShell'
+import { Button } from '../components/ui/Button'
+import { FeedbackBar } from '../components/ui/FeedbackBar'
+import { Input } from '../components/ui/Input'
+import { ArrowRightIcon, CheckIcon, MailIcon } from '../components/Icons'
 import { ApiError } from '../lib/api'
 import { useAuth } from '../lib/AuthContext'
 import '../styles/auth.css'
 
-const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-
-type LoginLocationState = {
+type LocationState = {
   email?: string
   justRegistered?: boolean
-  from?: string
 }
 
 export function LoginPage() {
   const navigate = useNavigate()
   const location = useLocation()
+  const state = (location.state as LocationState | null) ?? null
   const { login } = useAuth()
-  const state = (location.state ?? null) as LoginLocationState | null
-  const prefilledEmail = state?.email?.trim().toLowerCase() ?? ''
-  const justRegistered = Boolean(state?.justRegistered && prefilledEmail)
-  const [email, setEmail] = useState(prefilledEmail)
+  const [email, setEmail] = useState(state?.email ?? '')
   const [password, setPassword] = useState('')
   const [remember, setRemember] = useState(true)
-  const [capsLock, setCapsLock] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
-  const [fieldErrors, setFieldErrors] = useState<{ email?: string; password?: string }>({})
 
-  function validate(): boolean {
-    const next: { email?: string; password?: string } = {}
-    if (!email.trim()) next.email = 'Bạn nhập email đã đăng ký nhé.'
-    else if (!EMAIL_PATTERN.test(email.trim())) next.email = 'Email chưa đúng định dạng.'
-    if (!password) next.password = 'Bạn nhập mật khẩu để tiếp tục.'
-    setFieldErrors(next)
-    return Object.keys(next).length === 0
-  }
+  useEffect(() => {
+    if (state?.email) setEmail(state.email)
+  }, [state?.email])
 
-  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function submit(event: FormEvent) {
     event.preventDefault()
     setError('')
-    if (!validate() || loading) return
-
+    if (!email.trim() || !password) {
+      setError('Nhập email và mật khẩu để đăng nhập nhé.')
+      return
+    }
     setLoading(true)
     try {
       await login(email, password, remember)
-      const target = state?.from && state.from !== '/login' ? state.from : '/app'
-      navigate(target, { replace: true })
+      navigate('/app', { replace: true })
     } catch (caught) {
-      setError(
-        caught instanceof ApiError
-          ? caught.message
-          : 'Chưa thể đăng nhập lúc này. Vui lòng thử lại.',
-      )
+      setError(caught instanceof ApiError ? caught.message : 'Chưa đăng nhập được. Vui lòng thử lại.')
     } finally {
       setLoading(false)
     }
   }
 
-  function handlePasswordKeyUp(event: KeyboardEvent<HTMLInputElement>) {
-    setCapsLock(event.getModifierState('CapsLock'))
-  }
-
   return (
-    <AuthLayout variant="login">
-      <div className="auth__intro">
-        <span className="eyebrow">
-          <span className="eyebrow__dot" />
-          {justRegistered ? 'Tài khoản đã sẵn sàng' : 'Chào mừng trở lại'}
-        </span>
-        <h1>{justRegistered ? 'Đăng nhập để vào trang chủ' : 'Đăng nhập để tiếp tục'}</h1>
-        <p>
-          {justRegistered
-            ? 'Email của bạn đã được điền sẵn. Chỉ cần nhập mật khẩu là bước vào trang chủ.'
-            : 'Bầu trời từ vựng của bạn vẫn đang ở đây, chờ bạn quay lại.'}
-        </p>
-      </div>
-
-      <form className="auth-form" onSubmit={handleSubmit} noValidate>
-        {justRegistered && !error ? (
-          <div className="form-alert form-alert--success" role="status">
-            <CheckIcon size={17} />
-            <span>
-              Tài khoản <strong>{prefilledEmail}</strong> đã được tạo thành công.
-              Nhập mật khẩu để đăng nhập.
+    <AuthShell
+      pose="wave"
+      eyebrow="Chào mừng trở lại"
+      title={<>Đăng nhập để <span style={{ color: 'var(--pri)' }}>tiếp tục học</span></>}
+      lead="Nimbo đã giữ sẵn lộ trình và chuỗi ngày của bạn."
+    >
+      <form className="auth-form" onSubmit={submit} noValidate>
+        {state?.justRegistered ? (
+          <FeedbackBar tone="ok" title="Tài khoản đã sẵn sàng">
+            <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+              <CheckIcon size={13} /> Nhập mật khẩu để bắt đầu học.
             </span>
-          </div>
+          </FeedbackBar>
         ) : null}
+        {error ? <FeedbackBar tone="bad">{error}</FeedbackBar> : null}
 
-        {error ? (
-          <div className="form-alert" role="alert">
-            <SparkIcon size={17} />
-            <span>{error}</span>
-          </div>
-        ) : null}
-
-        <label className="field" htmlFor="login-email">
-          <span className="field__label">Email</span>
-          <span className={`field__control${fieldErrors.email ? ' is-invalid' : ''}`}>
-            <MailIcon size={19} className="field__icon" />
-            <input
-              id="login-email"
-              name="email"
-              type="email"
-              value={email}
-              onChange={(event) => setEmail(event.target.value)}
-              placeholder="ban@skyword.vn"
-              autoComplete="email"
-              inputMode="email"
-              autoFocus={!prefilledEmail}
-              disabled={loading}
-              aria-invalid={Boolean(fieldErrors.email)}
-            />
-          </span>
-          {fieldErrors.email ? <span className="field__hint is-error">{fieldErrors.email}</span> : null}
-        </label>
-
-        <PasswordField
-          id="login-password"
-          label="Mật khẩu"
-          value={password}
-          onChange={setPassword}
-          placeholder="Nhập mật khẩu của bạn"
-          autoComplete="current-password"
-          autoFocus={Boolean(prefilledEmail)}
-          invalid={Boolean(fieldErrors.password)}
-          hint={
-            fieldErrors.password ??
-            (capsLock ? 'Caps Lock đang bật — kiểm tra lại chữ hoa nhé.' : undefined)
-          }
-          onKeyUp={handlePasswordKeyUp}
+        <Input
+          label="Email"
+          type="email"
+          value={email}
+          onChange={(event) => setEmail(event.target.value)}
+          placeholder="ban@skyworld.vn"
+          autoComplete="email"
+          icon={<MailIcon size={18} />}
           disabled={loading}
         />
+        <Input
+          label="Mật khẩu"
+          type="password"
+          value={password}
+          onChange={(event) => setPassword(event.target.value)}
+          placeholder="Nhập mật khẩu"
+          autoComplete="current-password"
+          disabled={loading}
+          autoFocus={Boolean(state?.email)}
+        />
 
-        <div className="form-row">
+        <div className="auth-form__row">
           <label className="check">
             <input
               type="checkbox"
@@ -148,33 +93,22 @@ export function LoginPage() {
               onChange={(event) => setRemember(event.target.checked)}
               disabled={loading}
             />
-            <span className="check__box">
-              <CheckIcon size={13} />
-            </span>
-            <span>Ghi nhớ đăng nhập</span>
+            <span className="check__box"><CheckIcon size={12} /></span>
+            Ghi nhớ đăng nhập
           </label>
-          <span className="form-row__note">Phiên bảo mật 30 ngày</span>
+          <span className="auth-form__note">Phiên bảo mật 30 ngày</span>
         </div>
 
-        <button type="submit" className="btn btn--primary" disabled={loading}>
-          {loading ? (
-            <>
-              <span className="spinner" aria-hidden="true" />
-              Đang đăng nhập...
-            </>
-          ) : (
-            <>
-              Đăng nhập
-              <ArrowRightIcon size={19} />
-            </>
-          )}
-        </button>
-      </form>
+        <Button type="submit" block disabled={loading}>
+          {loading ? <span className="spinner" /> : null}
+          {loading ? 'Đang đăng nhập...' : 'ĐĂNG NHẬP'}
+          {!loading ? <ArrowRightIcon size={17} /> : null}
+        </Button>
 
-      <p className="auth__switch">
-        Lần đầu ghé SkyWord?{' '}
-        <Link to="/register">Tạo tài khoản mới</Link>
-      </p>
-    </AuthLayout>
+        <p className="auth-switch">
+          Lần đầu ghé SkyWorld? <Link to="/onboarding">Tạo tài khoản mới</Link>
+        </p>
+      </form>
+    </AuthShell>
   )
 }

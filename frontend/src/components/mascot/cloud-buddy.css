@@ -1,0 +1,78 @@
+.cloud-buddy {
+  display: block;
+  overflow: visible;
+  filter: drop-shadow(0 10px 16px rgba(29, 68, 104, 0.14));
+}
+
+.buddy__float {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: buddyFloat 3.8s ease-in-out infinite;
+}
+
+.buddy__arm {
+  transform-box: fill-box;
+  transform-origin: 50% 8%;
+  transition: transform 0.28s ease;
+}
+
+.cloud-buddy.is-cheer .buddy__arm--left {
+  transform: rotate(48deg) translateY(-8px);
+}
+
+.cloud-buddy.is-cheer .buddy__arm--right {
+  transform: rotate(-48deg) translateY(-8px);
+}
+
+.cloud-buddy.is-cheer .buddy__float {
+  animation-duration: 1.5s;
+}
+
+.cloud-buddy.is-think .buddy__arm--right {
+  transform: rotate(-34deg) translate(-4px, -6px);
+}
+
+.cloud-buddy.is-sad .buddy__arm--left {
+  transform: rotate(-12deg);
+}
+
+.cloud-buddy.is-sad .buddy__arm--right {
+  transform: rotate(12deg);
+}
+
+.buddy__pupils {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: buddyBlink 4.6s infinite;
+}
+
+@keyframes buddyFloat {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-3px);
+  }
+}
+
+@keyframes buddyBlink {
+  0%,
+  92%,
+  100% {
+    transform: scaleY(1);
+  }
+  94%,
+  96% {
+    transform: scaleY(0.08);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .buddy__float,
+  .buddy__pupils,
+  .buddy__arm {
+    animation: none;
+    transition: none;
+  }
+}

@@ -158,6 +158,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const updateUser = useCallback((user: UserProfile) => {
     setSession((current) => {
       if (!current) return current
+      // Dữ liệu dashboard trả về cùng một người dùng: giữ nguyên session để
+      // tránh vòng lặp render/tải lại giữa AppLayout và trang con.
+      if (JSON.stringify(current.user) === JSON.stringify(user)) return current
       const next = { ...current, user }
       saveSession(next, isPersistentSession())
       return next

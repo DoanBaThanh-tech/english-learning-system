@@ -1,74 +1,111 @@
-# SkyWord English — Frontend
+# SkyWorld — Frontend
 
-Project VS Code riêng cho giao diện SkyWord: **Vite + React 19 + TypeScript**.
+Giao diện **SkyWorld** (tiếng Việt) cho ứng dụng học tiếng Anh, dựng bằng **Vite + React 19 + TypeScript**, kết nối **API .NET thật** trong `backend/EnglishApp.Api`.
 
-## Mở project
-
-Mở thư mục `frontend/` trong VS Code (không mở cả repo nếu bạn chỉ làm giao diện).
+Mascot **Nimbo** là chú mây 3D dựng bằng Three.js r128, một canvas mỗi trang, tự dừng khi tab bị ẩn và tôn trọng `prefers-reduced-motion`.
 
 ## Chạy local
 
 ```bash
+# 1) API
+cd backend/EnglishApp.Api
+dotnet run            # http://localhost:5041
+# Nếu cổng 5041 đang bị tiến trình cũ giữ:
+# .\run-dev.ps1      # tự dừng tiến trình giữ cổng rồi chạy lại
+
+# 2) Giao diện
+cd frontend
 npm install
-npm run dev
+npm run dev           # http://localhost:5173
 ```
 
-- Web: http://localhost:5173
-- API cần chạy trước tại http://localhost:5041 (`dotnet run` trong `backend/EnglishApp.Api`).
-
-Cấu hình API nằm ở `.env.development`:
+Cấu hình API (tạo file `.env.development`, không commit):
 
 ```
-VITE_API_BASE_URL=http://localhost:5041
+VITE_API_URL=http://localhost:5041
 ```
 
-Khi deploy, đổi biến này sang domain API thật.
+`VITE_API_BASE_URL` vẫn được chấp nhận để tương thích; `VITE_API_URL` được ưu tiên.
 
-## Các trang hiện có
+## Lệnh
 
-| Route | Mô tả |
+| Lệnh | Tác dụng |
 |---|---|
-| `/` | Splash nền skyblue, vòng tròn ripple, logo orbit, chữ SkyWord English; tự chuyển sau ~3,5 giây |
-| `/welcome` | Trang giới thiệu: hero + 3 chức năng nổi bật; header có 2 nút Đăng nhập / Đăng ký |
-| `/onboarding` | Ba bước hỏi nhanh: kênh biết tới SkyWord, trình độ A1–C2, mục tiêu học (giao tiếp, du học, công việc, IELTS, TOEIC, du lịch, phim/nhạc, thi tốt nghiệp, khác); xem trước lộ trình ngay khi chọn |
-| `/login` | Đăng nhập một thẻ căn giữa trên ảnh bầu trời xanh; email, mật khẩu, ghi nhớ phiên |
-| `/register` | Tạo tài khoản: tên gọi, email, trình độ, mục tiêu ngày, mật khẩu + xác nhận; đọc câu trả lời onboarding để điền sẵn trình độ/mục tiêu và gửi kèm mục tiêu học + kênh giới thiệu |
-| `/app` | Trang chủ sau đăng nhập: lời chào, mục tiêu ngày, chuỗi ngày, thống kê, hoạt động 7 ngày và điểm kỹ năng; thẻ **Chương trình dành cho bạn** bám trình độ + mục tiêu học; nút 3 gạch cạnh logo mở menu vòng tròn 8 chức năng |
-| `/app/context` | Ngữ cảnh: nhập câu + từ, chạm từ trong câu để chọn, xem nghĩa đúng ngữ cảnh, độ tin cậy, bản dịch cả câu và các nghĩa thay thế; lưu từ kèm câu gốc |
-| `/app/words` | Sổ từ & SRS: thống kê mới/đang học/đã thuộc/đến hạn, tìm và lọc theo trạng thái/thư mục/thẻ, thêm từ theo lemma + câu ngữ cảnh, sửa ghi chú/thư mục/thẻ ngay trong thẻ từ, xóa có xác nhận, quản lý thư mục/thẻ, phiên ôn flashcard tự chấm Lại/Khó/Được/Dễ và tổng kết độ chính xác |
-| `/app/profile` | Hồ sơ: xem và cập nhật tên gọi, ảnh đại diện (URL), trình độ A1–C2, **mục tiêu học**, mục tiêu từ/ngày, múi giờ; xem kênh đã giới thiệu; đổi mật khẩu có kiểm tra và thu hồi phiên khác |
-| `/app/stats` | Thống kê: chuỗi ngày, thời gian học, độ chính xác, số từ, việc đến hạn; biểu đồ 14/30/90 ngày; radar + thanh điểm 5 kỹ năng; bản đồ nhiệt 90 ngày; phiên học gần đây; trạng thái onboarding khi chưa có dữ liệu |
-| `/app/plan` | Lộ trình: tạo kế hoạch 3–90 ngày, 5–120 phút/ngày, chọn kỹ năng ưu tiên (mặc định theo mục tiêu học); xem tiến độ, cơ cấu kỹ năng, dòng thời gian Cần làm/Sắp tới/Đã xong/Tất cả, đánh dấu hoàn thành, thêm nhiệm vụ, xóa lộ trình và xem lịch sử |
+| `npm run dev` | Chạy Vite, cổng 5173 (tự chuyển cổng nếu bận) |
+| `npm run build` | `tsc -b` + build production vào `dist/` |
+| `npm run preview` | Xem bản build tại cổng 4173 |
+| `npm run lint` | Kiểm tra bằng oxlint |
 
-Nút **Bắt đầu miễn phí** (và **Tạo tài khoản** ở cuối trang giới thiệu) dẫn tới `/onboarding` thay vì mở thẳng form đăng ký. Câu trả lời được truyền sang `/register` qua router state: trình độ điền sẵn, mục tiêu từ/ngày gợi ý theo trình độ + mục tiêu học, kèm băng tóm tắt chương trình và link **Đổi câu trả lời** (quay lại onboarding với lựa chọn cũ). Đăng ký gửi `learningPurpose` + `referralSource`; API lưu vào `Users.LearningPurpose` / `Users.ReferralSource`. Trang chủ dùng hai trường này để vẽ chương trình, kỹ năng ưu tiên và nhịp học; nếu chưa chọn mục tiêu, thẻ mời chọn trong Hồ sơ. Mục tiêu thay đổi trong Hồ sơ được lưu bằng `PUT /api/users/me` và cập nhật ngay trang chủ.
+## Route
 
-Đăng ký thành công sẽ chuyển sang `/login` với email vừa đăng ký được điền sẵn và con trỏ nằm ở ô mật khẩu; người dùng chỉ cần nhập mật khẩu. Đăng nhập thành công vào thẳng `/app`. Người đã có phiên mở `/login`, `/register` sẽ được đưa về `/app`; khách mở `/app` sẽ được đưa về `/login`.
+| Route | Trang |
+|---|---|
+| `/` | Welcome: hero Nimbo, 7 tính năng, 5 khối giới thiệu, CTA, footer |
+| `/onboarding` | 3 câu hỏi cá nhân hóa: kênh biết tới, trình độ A1–C2, mục tiêu |
+| `/register` | Tạo tài khoản, điền sẵn trình độ/mục tiêu từ onboarding |
+| `/login` | Đăng nhập, điền sẵn email sau khi đăng ký |
+| `/app` | Học: bản đồ khóa Nimbus 12 level, XP, sao, lộ trình cá nhân |
+| `/app/lesson/:levelId` | Màn chơi level: trắc nghiệm, ghép cặp, xếp câu, nghe chép, điền từ |
+| `/app/dictionary` | Từ điển: tra từ, nghe, lưu từ, tra theo ngữ cảnh |
+| `/app/vocabulary` | Sổ từ: lọc, thư mục, thẻ, thêm/sửa/xóa từ |
+| `/app/review` | Ôn tập SM-2: flashcard 4 mức Quên/Khó/Tốt/Dễ |
+| `/app/practice` | Luyện: trắc nghiệm, điền từ, nghe chép chính tả |
+| `/app/speaking` | Luyện nói: micro, chấm điểm, âm vị và gợi ý |
+| `/app/chat` | Trò chuyện AI theo tình huống, sửa ngữ pháp |
+| `/app/reading` | Bài đọc A1–C2, tạo bài từ văn bản, tra từ khi đọc |
+| `/app/stats` | Thống kê: chuỗi ngày, biểu đồ, kỹ năng, bản đồ nhiệt |
+| `/app/profile` | Hồ sơ: mục tiêu, trình độ, mục tiêu ngày, đổi mật khẩu |
 
-Trang **Ngữ cảnh** nằm ở `/app/context` và cũng yêu cầu đăng nhập. Trang gọi thật `POST /api/dictionary/context-lookup` để chọn nghĩa theo câu, hiển thị độ tin cậy, nguồn chọn nghĩa, bản dịch cả câu và tối đa 6 nghĩa thay thế; nút lưu gọi `POST /api/vocabulary/words` với `senseId` + câu gốc. Trong menu vòng tròn, năm mục **Từ điển ngữ cảnh**, **Sổ từ**, **Thống kê**, **Lộ trình** và **Hồ sơ** có chấm “đã mở” và nút **Mở chức năng**; Phát âm, Gia sư AI và Bài đọc vẫn là “Sắp mở”.
+Đường dẫn SkyWord cũ được chuyển hướng: `/app/words` → `/app/vocabulary`, `/app/context` → `/app/dictionary`, `/app/plan` → `/app`, `/welcome` → `/`.
 
-## Auth & API
+## Thiết kế
 
-- `src/lib/api.ts`: gọi API, chuẩn hóa lỗi ProblemDetails.
-- `src/lib/AuthContext.tsx`: lưu phiên, đăng nhập/đăng ký/đăng xuất, tự refresh access token khi gặp 401.
-- Access token + refresh token được lưu ở `localStorage` khi chọn “Ghi nhớ đăng nhập”, ngược lại dùng `sessionStorage`.
-- Mật khẩu được băm PBKDF2 phía API; frontend không bao giờ lưu mật khẩu.
+- `src/styles/tokens.css`: token màu sáng/tối, font **Baloo 2** (tiêu đề) + **Nunito** (nội dung), reset, focus ring, reduced motion.
+- `src/styles/ui.css`: `.btn` khối nổi (viền 2px, đáy 5px, chữ hoa, active nhấn xuống), `.card`, form, tab, progress, chip, modal, feedback, skeleton.
+- Mỗi trang có CSS riêng trong `src/styles/`.
+- Dark mode theo `prefers-color-scheme` và `data-theme="dark"`; chữ dùng token nên đổi màu an toàn.
+- Responsive từ 320px đến TV 4K; app dùng sidebar trái + cột giữa tối đa 760px + rail phải trên desktop, thanh tab dưới trên mobile.
 
-## Dữ liệu
+## Mascot Nimbo
 
-Database mặc định trắng: không có tài khoản demo, không nạp sẵn từ vựng hay bài học. Người dùng đầu tiên bấm **Tạo tài khoản mới** và đăng nhập bằng chính tài khoản đó.
+`src/components/mascot/NimboMascot.tsx`
 
-## Kiểm tra build
-
-```bash
-npm run build
+```tsx
+<NimboMascot pose="idle" size={320} interactive onClick={() => {}} />
 ```
 
-Kết quả hiện tại: build thành công, 0 lỗi TypeScript. Luồng thật đã được kiểm thử end-to-end: splash → trang giới thiệu → đăng ký → trang đăng nhập điền sẵn email → nhập mật khẩu → trang chủ → đăng xuất → đăng nhập lại → tự refresh token.
+- Pose: `idle | shock | think | sad | wave | cheer | walk`.
+- Thân mây SDF (rounded box + 5 ellipsoid, smooth-union k = 0.14), chiếu lên `SphereGeometry(1, 96, 64)`.
+- Vertex color `#e3ecf5 → #b9d8f0`, ACES tone mapping, sRGB.
+- Mắt, mí, lông mày, má, miệng, lưỡi, nhíu mày, nước mắt; tay, chân, giày.
+- Thở, trôi nhẹ, xoay chậm, chớp mắt; pose chỉ nội suy, không dựng lại scene.
+- Kéo để xoay, chạm để vẫy tay 2,4 giây (Welcome).
+- Dispose toàn bộ geometry/material/renderer khi unmount; tạm dừng khi `document.hidden`.
 
-Bốn trang mới đã được kiểm thử với API thật trên database của user 1: đọc/cập nhật hồ sơ (giữ nguyên dữ liệu thật), tạo–sửa–xóa từ kèm câu ngữ cảnh, tạo/xóa thư mục và thẻ, phiên ôn `review` với flashcard (chấm quality 4) rồi `finish`, tạo lộ trình 7 ngày, hoàn thành nhiệm vụ, thêm nhiệm vụ và xóa lộ trình. Sau kiểm thử, toàn bộ từ/thư mục/thẻ/lộ trình/phiên học/progress thử đã được dọn sạch; database trở lại **1 user thật, 0 từ, 0 lộ trình** và điểm 5 kỹ năng về 50.
+## Khóa học Nimbus
 
-Giao diện được duyệt bằng Chrome headless ở 320, 390, 768, 1024, 1366, 1920 và 3840px cho bốn trang (28 phép đo): không tràn ngang, không lỗi console. Đã chụp thêm trạng thái rỗng của cả bốn trang, form thêm/sửa từ, phiên ôn trước/sau khi lật thẻ và màn hình tổng kết, form tạo lộ trình, form thêm nhiệm vụ, trạng thái vừa hoàn thành nhiệm vụ, menu vòng tròn chọn chức năng và nút **Mở chức năng** điều hướng đúng route.
+- `src/lib/curriculum.ts`: 3 unit × 4 level (A1 → B1), mỗi level 5 dạng bài: trắc nghiệm, ghép cặp, xếp câu, nghe chép, điền từ.
+- `src/lib/courseProgress.ts`: tiến độ, XP và sao lưu theo email trong `localStorage` (`skyworld.course.v1:<email>`), không ghi vào DB để giữ database trắng.
+- Hoàn thành level mở level kế; 3 sao khi đạt ≥ 90% câu đúng, 2 sao khi ≥ 70%, còn lại 1 sao.
+- `src/components/mascot/CloudBuddy.tsx`: 6 bạn mây SVG cùng nét với Nimbo — Pip, Lumi, Misty, Bibi, Coco và Nimbo. Mỗi dạng bài có một bạn đồng hành riêng.
+- `src/components/mascot/CloudFriends.tsx`: cụm 3 nhân vật mây 3D (Nimbo, Lumi, Pip) trong **một** canvas three.js, phản ứng `cheer / sad / think` theo câu trả lời.
+- Màn chơi ẩn sidebar/rail/tab để tập trung; nút “Lưu từ vào sổ” gọi API `POST /api/vocabulary/words/by-lemma` (best-effort, báo số từ đã lưu).
 
-Luồng onboarding mới đã được kiểm thử end-to-end với API thật: **Bắt đầu miễn phí** → chọn TikTok → B2 → IELTS → form đăng ký điền sẵn B2/30 từ/ngày kèm băng IELTS Foundation → tạo tài khoản → đăng nhập → trang chủ hiện **IELTS Foundation** (B2, 30 từ/ngày, 20 phút/ngày, 21 ngày, trọng tâm Đọc) → mở Lộ trình thấy sẵn 21 ngày/20 phút/kỹ năng Đọc → đổi mục tiêu sang Công việc trong Hồ sơ → trang chủ cập nhật **Tiếng Anh cho công việc**. API trả 400 với mã mục tiêu lạ. Đã đo onboarding (cả 3 bước), trang chủ, form lộ trình và Hồ sơ ở 320–3840px: 0 tràn ngang, 0 lỗi console; sửa khoảng đệm để nhãn cấp độ A1–C2 không bị nút chọn che ở 320px. Sau kiểm thử, hai tài khoản test và toàn bộ lộ trình/nhiệm vụ/refresh token của chúng đã được xóa; database trở lại **1 user thật**, 0 lộ trình, 0 từ.
+## API
 
-Bố cục đã được kiểm tra ở 320, 360, 390, 430, 768, 1024, 1366, 1920, 2560 và 3840px: không tràn ngang, header/2 nút luôn vừa, thẻ đăng nhập/đăng ký nằm trong màn hình và form dài có thể cuộn.
+Hợp đồng đầy đủ: [`API_CONTRACT.md`](./API_CONTRACT.md).
+
+- `src/lib/api.ts`: client REST, chuẩn hóa lỗi `ProblemDetails`.
+- `src/lib/AuthContext.tsx`: phiên đăng nhập, refresh token một lần khi gặp 401.
+- `src/lib/useAuthedApi.ts`: bọc gọi API kèm token và tự đăng xuất khi hết phiên.
+
+Database mặc định trắng: không có tài khoản demo, không seed từ vựng/bài học. Người dùng đầu tiên tự đăng ký.
+
+## Kiểm thử đã chạy
+
+- `npm run build`: TypeScript 0 lỗi, Vite build thành công.
+- Khóa Nimbus: hoàn thành level 1-1 qua cả 5 dạng bài (100%, 3 sao, +70 XP), mở khóa level 2, chặn level chưa mở, trả lời sai trừ tim và hiện đáp án; tiến độ lưu/đọc lại đúng theo email.
+- Luồng thật: Welcome → onboarding 3 bước → đăng ký → đăng nhập → Học → tra từ → lưu từ → sửa trạng thái/thư mục/thẻ → ôn SM-2 → luyện trắc nghiệm → chấm phát âm → trò chuyện → tạo bài đọc + lưu từ + ghi tiến độ → tạo lộ trình → thống kê → cập nhật hồ sơ.
+- Duyệt giao diện 320 / 390 / 768 / 1024 / 1440 / 1920 / 3840 px, light + dark: không tràn ngang, mỗi trang tối đa 1 canvas, không lỗi console. Màn chơi level dùng đúng 1 canvas 3D (rail Nimbo được ẩn).
+
+> Ghi chú: nếu API chưa cấu hình nhà cung cấp AI, trang Trò chuyện dùng phản hồi mẫu và hiển thị rõ trạng thái ngoại tuyến. Cloudinary chỉ nên dùng **unsigned preset**; không commit `.env` hoặc file chứa secret.

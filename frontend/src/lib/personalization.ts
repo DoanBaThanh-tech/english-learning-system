@@ -267,7 +267,7 @@ export function buildProgram(
     title: info?.program ?? 'Lộ trình tiếng Anh của bạn',
     tagline:
       info?.tagline ??
-      'Chọn mục tiêu học để SkyWord tập trung đúng phần kiến thức bạn cần dùng.',
+      'Chọn mục tiêu học để SkyWorld tập trung đúng phần kiến thức bạn cần dùng.',
     levelBand: level?.band ?? 'Nền tảng',
     levelLabel: levelCode
       ? `${levelCode}${levelName ? ` · ${levelName}` : ''}`

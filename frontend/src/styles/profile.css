@@ -1,669 +1,295 @@
-/* ---------- Hồ sơ ---------- */
-
-.profile-page .page-hero {
-  padding-bottom: clamp(18px, 2.4vw, 28px);
-}
-
-.profile-layout {
+.profile__layout {
   display: grid;
-  grid-template-columns: minmax(280px, 0.78fr) minmax(0, 1.22fr);
-  gap: clamp(16px, 2.4vw, 28px);
+  grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr);
+  gap: 14px;
   align-items: start;
-  padding-bottom: clamp(30px, 4vw, 52px);
 }
 
-/* ---------- Thẻ danh tính ---------- */
 .profile-id {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding-top: clamp(24px, 3vw, 36px);
   text-align: center;
-  animation: fadeUp 0.62s var(--ease-out) 0.04s both;
-}
-
-.profile-id__top {
   display: flex;
   flex-direction: column;
   align-items: center;
-  width: 100%;
+  gap: 4px;
 }
 
 .profile-avatar {
-  position: relative;
   display: grid;
   place-items: center;
-  width: clamp(96px, 11vw, 126px);
-  aspect-ratio: 1;
-  margin-bottom: 14px;
+  width: 92px;
+  height: 92px;
+  margin-bottom: 4px;
+  border: 3px solid var(--card);
   border-radius: 50%;
-  background: linear-gradient(140deg, #8fd2f8, #2f8ed8 62%, #1c6fb2);
-  box-shadow:
-    0 26px 46px -26px rgba(28, 111, 178, 0.7),
-    inset 0 1px 0 rgba(255, 255, 255, 0.5);
-  color: #ffffff;
-  font-family: 'Baloo 2', 'Be Vietnam Pro', sans-serif;
-  font-size: clamp(2.3rem, 3.5vw, 3.1rem);
-  font-weight: 700;
-  overflow: visible;
+  background: var(--sky);
+  color: var(--pri);
+  font-family: var(--font-title);
+  font-size: 2.2rem;
+  font-weight: 800;
+  box-shadow: 0 0 0 3px rgba(59, 143, 208, 0.25);
+  overflow: hidden;
 }
 
 .profile-avatar img {
   width: 100%;
   height: 100%;
-  border-radius: 50%;
   object-fit: cover;
 }
 
-.profile-avatar__ring {
-  position: absolute;
-  inset: -9px;
-  border: 1px dashed rgba(75, 164, 230, 0.42);
-  border-radius: 50%;
-  animation: orbitSpin 26s linear infinite;
-  pointer-events: none;
+.profile-id h2 {
+  font-size: 1.3rem;
 }
 
-.profile-id__level {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  padding: 5px 11px;
-  border: 1px solid rgba(123, 189, 240, 0.3);
-  border-radius: 999px;
-  background: rgba(239, 248, 255, 0.9);
-  color: var(--sky-700);
-  font-size: 0.68rem;
-  font-weight: 600;
-}
-
-.profile-id__top h2 {
-  max-width: 100%;
-  margin-top: 10px;
-  overflow-wrap: anywhere;
-  font-family: 'Baloo 2', 'Be Vietnam Pro', sans-serif;
-  font-size: clamp(1.4rem, 2.1vw, 1.8rem);
-  font-weight: 700;
-  line-height: 1.18;
-}
-
-.profile-id__email,
-.profile-id__joined {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  max-width: 100%;
-  margin-top: 7px;
-  overflow: hidden;
-  color: #587a90;
+.profile-id__email {
+  color: var(--mut);
   font-size: 0.74rem;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  word-break: break-all;
 }
 
-.profile-id__email svg,
-.profile-id__joined svg {
-  flex: none;
-  color: #79a8c7;
+.profile-id__meta {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 4px;
+  margin-top: 6px;
 }
 
-.profile-id__joined {
-  margin-top: 4px;
-  font-size: 0.68rem;
-  color: var(--muted);
-}
-
-/* ---------- Mục tiêu trong thẻ danh tính ---------- */
 .profile-goal {
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 12px;
   width: 100%;
-  margin-top: 20px;
-  padding-top: 18px;
-  border-top: 1px solid rgba(10, 37, 64, 0.07);
+  margin-top: 12px;
+  padding: 10px;
+  border-radius: 16px;
+  background: var(--sky);
   text-align: left;
 }
 
 .profile-goal__ring {
   position: relative;
-  display: grid;
+  width: 76px;
+  height: 76px;
   flex: none;
-  place-items: center;
-  width: 88px;
-  aspect-ratio: 1;
 }
 
 .profile-goal__ring svg {
-  position: absolute;
-  inset: 0;
   width: 100%;
   height: 100%;
   transform: rotate(-90deg);
 }
 
-.profile-goal__track,
-.profile-goal__value {
+.profile-goal__ring circle {
   fill: none;
   stroke-width: 9;
+}
+
+.profile-goal__track { stroke: rgba(59, 143, 208, 0.18); }
+
+.profile-goal__value {
+  stroke: var(--pri);
   stroke-linecap: round;
 }
 
-.profile-goal__track {
-  stroke: rgba(123, 189, 240, 0.16);
-}
-
-.profile-goal__value {
-  stroke: #2f8ed8;
-  transition: stroke-dashoffset 0.9s var(--ease-out);
-}
-
 .profile-goal__ring > span {
-  position: relative;
-  z-index: 1;
+  position: absolute;
+  inset: 0;
   display: flex;
   align-items: baseline;
-  color: var(--ink);
+  justify-content: center;
+  gap: 1px;
+  padding-top: 27px;
 }
 
 .profile-goal__ring strong {
-  font-family: 'Baloo 2', 'Be Vietnam Pro', sans-serif;
-  font-size: 1.25rem;
-  font-weight: 700;
+  font-family: var(--font-title);
+  font-size: 1.2rem;
   line-height: 1;
+  color: var(--tx);
 }
 
 .profile-goal__ring em {
-  font-style: normal;
+  color: var(--mut);
   font-size: 0.62rem;
-  font-weight: 600;
-  color: var(--muted);
+  font-style: normal;
+  font-weight: 700;
 }
 
 .profile-goal__title {
   display: block;
   margin-top: 2px;
-  font-family: 'Baloo 2', 'Be Vietnam Pro', sans-serif;
-  font-size: 1.02rem;
-  font-weight: 700;
-  line-height: 1.25;
-  color: var(--sky-700);
+  color: var(--tx);
+  font-size: 0.88rem;
 }
 
 .profile-goal p {
-  margin-top: 3px;
-  font-size: 0.68rem;
-  line-height: 1.5;
-  color: var(--muted);
+  color: var(--mut);
+  font-size: 0.7rem;
 }
 
-/* ---------- Ảnh chụp nhanh ---------- */
-.profile-snapshot {
+.profile-stats {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 8px;
+  gap: 5px;
   width: 100%;
-  margin-top: 18px;
+  margin-top: 10px;
 }
 
-.profile-snapshot > div {
-  display: grid;
-  grid-template-columns: auto 1fr;
-  grid-template-rows: auto auto;
-  gap: 0 8px;
+.profile-stats span {
+  display: flex;
   align-items: center;
-  padding: 11px 12px;
-  border: 1px solid rgba(123, 189, 240, 0.18);
-  border-radius: 14px;
-  background: rgba(248, 252, 255, 0.8);
-  text-align: left;
-}
-
-.profile-snapshot svg {
-  grid-row: 1 / 3;
-  color: var(--sky-600);
-}
-
-.profile-snapshot strong {
-  font-family: 'Baloo 2', 'Be Vietnam Pro', sans-serif;
-  font-size: 1.05rem;
+  gap: 5px;
+  padding: 6px 8px;
+  border-radius: 10px;
+  background: var(--card);
+  border: 1.5px solid var(--ln);
+  color: var(--mut);
+  font-size: 0.66rem;
   font-weight: 700;
-  line-height: 1;
-  color: var(--ink);
 }
 
-.profile-snapshot span {
-  font-size: 0.62rem;
-  color: var(--muted);
-  line-height: 1.2;
+.profile-stats strong {
+  color: var(--tx);
+  font-size: 0.78rem;
 }
 
-/* ---------- Cột form ---------- */
-.profile-panels {
-  display: grid;
-  gap: clamp(14px, 2vw, 22px);
-  min-width: 0;
+.profile-program h2 {
+  margin-top: 6px;
+  font-size: 1.15rem;
+  color: var(--pri);
 }
 
-.profile-form {
-  animation: fadeUp 0.62s var(--ease-out) 0.08s both;
+.profile-program > p {
+  margin-top: 4px;
+  color: var(--mut);
+  font-size: 0.76rem;
 }
 
-.profile-security {
-  animation: fadeUp 0.62s var(--ease-out) 0.14s both;
-}
-
-.profile-form__mark {
-  display: grid;
-  place-items: center;
-  width: 38px;
-  height: 38px;
-  flex: none;
-  border-radius: 12px;
-  background: rgba(228, 242, 255, 0.95);
-  color: var(--sky-700);
-}
-
-.profile-form__mark--shield {
-  background: rgba(37, 161, 134, 0.1);
-  color: #1d8a73;
-}
-
-.profile-fields {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 14px;
-  margin-top: 18px;
-}
-
-.profile-field {
+.profile-program__steps {
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  min-width: 0;
+  gap: 4px;
+  margin-top: 8px;
 }
 
-.profile-field > span:first-child {
-  font-size: 0.76rem;
-  font-weight: 600;
-  color: var(--ink-2);
-}
-
-.profile-field input,
-.profile-field select {
-  width: 100%;
-  min-height: 48px;
-  padding: 12px 14px;
-  border: 1.5px solid rgba(123, 189, 240, 0.3);
-  border-radius: 14px;
-  outline: none;
-  background: rgba(247, 251, 255, 0.9);
-  color: var(--ink);
-  font: inherit;
-  font-size: 0.9rem;
-  transition:
-    border-color 0.2s ease,
-    background 0.2s ease,
-    box-shadow 0.2s ease;
-}
-
-.profile-field input:focus,
-.profile-field select:focus {
-  border-color: var(--sky-400);
-  background: #ffffff;
-  box-shadow: 0 0 0 4px rgba(123, 189, 240, 0.15);
-}
-
-.profile-field em {
-  font-style: normal;
-  font-size: 0.65rem;
-  line-height: 1.5;
-  color: var(--muted);
-}
-
-.profile-purpose-note {
+.profile-program__steps span {
   display: flex;
-  align-items: flex-start;
-  gap: 10px;
-  margin-top: 14px;
-  padding: 12px 14px;
-  border-radius: 14px;
-  border: 1px dashed rgba(75, 164, 230, 0.42);
-  background: rgba(238, 248, 255, 0.72);
+  align-items: center;
+  gap: 5px;
+  color: var(--tx);
+  font-size: 0.72rem;
+  font-weight: 700;
 }
 
-.profile-purpose-note__icon {
-  display: grid;
-  place-items: center;
-  flex: 0 0 auto;
-  width: 30px;
-  height: 30px;
-  border-radius: 10px;
-  background: rgba(75, 164, 230, 0.14);
-  color: var(--sky-700);
+.profile-program__steps svg {
+  color: var(--pri);
 }
 
-.profile-purpose-note strong {
-  display: block;
-  font-size: 0.85rem;
-  color: var(--ink);
+.profile-program__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1.5px dashed rgba(59, 143, 208, 0.35);
 }
 
-.profile-purpose-note span:last-child {
-  display: block;
-  margin-top: 2px;
-  font-size: 0.73rem;
-  line-height: 1.5;
-  color: var(--muted);
+.profile-program__meta span {
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: var(--card);
+  color: var(--pri);
+  font-size: 0.64rem;
+  font-weight: 800;
 }
 
-.profile-select {
-  position: relative;
-  display: block;
-}.profile-select select {
-  appearance: none;
-  cursor: pointer;
-  padding-right: 34px;
-}
-
-.profile-select::after {
-  content: '';
-  position: absolute;
-  top: 50%;
-  right: 14px;
-  width: 7px;
-  height: 7px;
-  border-right: 2px solid #79a8c7;
-  border-bottom: 2px solid #79a8c7;
-  transform: translateY(-70%) rotate(45deg);
-  pointer-events: none;
-}
-
-/* ---------- Mục tiêu ---------- */
 .profile-goal-picker {
-  margin-top: 18px;
-  padding: 15px;
-  border: 1px solid rgba(123, 189, 240, 0.2);
-  border-radius: 17px;
-  background: rgba(244, 250, 255, 0.7);
+  margin-top: 14px;
+  padding: 12px;
+  border-radius: 14px;
+  background: var(--sky);
 }
 
 .profile-goal-picker__head {
   display: flex;
   align-items: baseline;
   justify-content: space-between;
-  gap: 10px;
-}
-
-.profile-goal-picker__head span {
-  font-size: 0.74rem;
-  font-weight: 600;
-  color: var(--ink-2);
+  gap: 8px;
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: var(--tx);
 }
 
 .profile-goal-picker__head strong {
-  font-family: 'Baloo 2', 'Be Vietnam Pro', sans-serif;
-  font-size: 1.15rem;
-  font-weight: 700;
-  color: var(--sky-700);
+  color: var(--pri);
 }
 
 .profile-goal-picker__options {
   display: grid;
   grid-template-columns: repeat(5, minmax(0, 1fr));
-  gap: 6px;
-  margin-top: 9px;
+  gap: 5px;
+  margin: 8px 0;
 }
 
 .profile-goal-picker__options button {
-  min-width: 0;
-  padding: 7px 4px;
-  border: 1px solid rgba(123, 189, 240, 0.26);
-  border-radius: 10px;
-  background: rgba(255, 255, 255, 0.8);
-  color: #587a90;
-  font: inherit;
-  font-size: 0.76rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition:
-    background 0.18s ease,
-    border-color 0.18s ease,
-    color 0.18s ease,
-    transform 0.18s ease;
-}
-
-.profile-goal-picker__options button:hover {
-  border-color: rgba(75, 164, 230, 0.5);
-  color: var(--sky-700);
-  transform: translateY(-1px);
+  min-height: 34px;
+  border: 1.5px solid var(--ln);
+  border-radius: 9px;
+  background: var(--card);
+  color: var(--mut);
+  font-size: 0.72rem;
+  font-weight: 800;
 }
 
 .profile-goal-picker__options button.is-active {
-  border-color: transparent;
-  background: linear-gradient(135deg, #5db3ee, #2f8ed8);
-  box-shadow: 0 8px 18px -12px rgba(47, 142, 216, 0.9);
-  color: #ffffff;
+  border-color: var(--pri);
+  background: var(--pri);
+  color: #fff;
 }
 
 .profile-goal-picker input[type='range'] {
   width: 100%;
-  margin-top: 12px;
-  accent-color: var(--sky-600);
-  cursor: pointer;
-}
-
-.profile-goal-picker > p {
-  margin-top: 5px;
-  font-size: 0.64rem;
-  color: var(--muted);
-}
-
-/* ---------- Cảnh báo / thành công ---------- */
-.profile-alert {
-  display: flex;
-  align-items: flex-start;
-  gap: 6px;
-  margin-top: 14px;
-  padding: 9px 12px;
-  border-radius: 11px;
-  font-size: 0.72rem;
-  line-height: 1.55;
-}
-
-.profile-alert svg {
-  flex: none;
-  margin-top: 1px;
-}
-
-.profile-alert--error {
-  border: 1px solid rgba(217, 83, 79, 0.24);
-  background: rgba(255, 246, 246, 0.9);
-  color: #b8433f;
-}
-
-.profile-alert--success {
-  border: 1px solid rgba(37, 161, 134, 0.24);
-  background: rgba(240, 252, 249, 0.95);
-  color: #1d8a73;
+  accent-color: var(--pri);
 }
 
 .profile-form__actions {
   display: flex;
   flex-wrap: wrap;
-  align-items: center;
-  gap: 9px;
-  margin-top: 18px;
-  padding-top: 16px;
-  border-top: 1px dashed rgba(123, 189, 240, 0.24);
+  gap: 8px;
+  margin-top: 14px;
 }
 
-.profile-security__note {
-  flex: 1;
-  min-width: 150px;
-  font-size: 0.65rem;
-  line-height: 1.5;
-  color: var(--muted);
+.profile-password .page-stack {
+  gap: 10px;
 }
 
-.profile-security .profile-fields {
-  grid-template-columns: 1fr;
-}
-
-/* ---------- Responsive ---------- */
-@media (max-width: 980px) {
-  .profile-layout {
+@media (max-width: 1000px) {
+  .profile__layout {
     grid-template-columns: 1fr;
   }
-
-  .profile-id {
-    max-width: 560px;
-    margin-inline: auto;
-  }
 }
 
-@media (max-width: 620px) {
-  .profile-fields {
-    grid-template-columns: 1fr;
-  }
-
-  .profile-id__email,
-  .profile-id__joined {
-    white-space: normal;
+@media (max-width: 520px) {
+  .profile-goal {
+    flex-direction: column;
     text-align: center;
   }
-}
-
-@media (max-width: 430px) {
-  .profile-layout {
-    gap: 12px;
-  }
-
-  .profile-goal {
-    align-items: flex-start;
-  }
 
   .profile-goal__ring {
-    width: 72px;
+    align-self: center;
   }
 
-  .profile-snapshot {
-    gap: 6px;
+  .profile-form__actions .btn {
+    flex: 1;
   }
 
-  .profile-snapshot > div {
-    padding: 9px 10px;
+  .profile-goal-picker__options {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 3px;
   }
 
-  .profile-snapshot strong {
-    font-size: 0.95rem;
-  }
-
-  .profile-form__actions .page-btn--primary {
-    flex: 1 1 100%;
-  }
-}
-
-/* ---------- TV ---------- */
-@media (min-width: 1700px) {
-  .profile-avatar {
-    width: 142px;
-  }
-
-  .profile-id__top h2 {
-    font-size: 2.05rem;
-  }
-
-  .profile-id__level {
-    font-size: 0.78rem;
-  }
-
-  .profile-id__email,
-  .profile-id__joined {
-    font-size: 0.84rem;
-  }
-
-  .profile-goal__ring {
-    width: 104px;
-  }
-
-  .profile-goal__title {
-    font-size: 1.2rem;
-  }
-
-  .profile-snapshot strong {
-    font-size: 1.3rem;
-  }
-
-  .profile-field > span:first-child,
-  .profile-goal-picker__head span {
-    font-size: 0.88rem;
-  }
-
-  .profile-field input,
-  .profile-field select {
-    min-height: 54px;
-    font-size: 1rem;
-  }
-
-  .profile-alert {
-    font-size: 0.82rem;
-  }
-
-  .profile-security__note {
-    font-size: 0.76rem;
-  }
-}
-
-@media (min-width: 2300px) {
-  .profile-avatar {
-    width: 172px;
-  }
-
-  .profile-snapshot strong {
-    font-size: 1.5rem;
-  }
-
-  .profile-snapshot span {
-    font-size: 0.75rem;
-  }
-
-  .profile-field input,
-  .profile-field select {
-    min-height: 60px;
-    font-size: 1.08rem;
-  }
-}
-
-@media (min-width: 3000px) {
-  .profile-avatar {
-    width: 200px;
-  }
-
-  .profile-id__top h2 {
-    font-size: 2.6rem;
-  }
-
-  .profile-goal__ring {
-    width: 130px;
-  }
-
-  .profile-goal__title {
-    font-size: 1.5rem;
-  }
-
-  .profile-snapshot strong {
-    font-size: 1.8rem;
-  }
-
-  .profile-field input,
-  .profile-field select {
-    min-height: 68px;
-    font-size: 1.2rem;
-  }
-
-  .profile-alert {
-    font-size: 0.95rem;
+  .profile-goal-picker__options button {
+    padding: 0;
+    font-size: 0.68rem;
   }
 }

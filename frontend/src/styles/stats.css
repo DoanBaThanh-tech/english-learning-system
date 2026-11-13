@@ -1,897 +1,239 @@
-/* ============================================================
-   Trang Thống kê — nhịp học, kỹ năng, bản đồ nhiệt
-   Tông trời nhạt, thẻ trắng, màu nhấn tiết chế để đọc lâu
-   ============================================================ */
-
-.stats-page {
-  --stats-ink: #17364d;
-  --stats-soft: #7d95a6;
-  --warm: #e98a4e;
-  --warm-soft: #fff3e8;
-  --mint: #2f9e88;
-  --mint-soft: #e8f7f3;
-}
-
-/* ---------- Khối mời bắt đầu ---------- */
-.stats-start {
+.stats__grid {
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto;
-  align-items: center;
-  gap: clamp(14px, 2vw, 24px);
-  margin-bottom: 16px;
-  border-color: rgba(123, 189, 240, 0.34);
-  background:
-    radial-gradient(120% 160% at 0% 0%, rgba(192, 229, 255, 0.34), transparent 58%),
-    linear-gradient(150deg, rgba(255, 255, 255, 0.98), rgba(244, 251, 255, 0.9));
-  animation: fadeUp 0.65s var(--ease-out) both;
+  grid-template-columns: minmax(0, 1.45fr) minmax(0, 0.75fr);
+  gap: 12px;
+  margin-top: 12px;
 }
 
-.stats-start__icon {
-  display: grid;
-  place-items: center;
-  width: 48px;
-  height: 48px;
-  border-radius: 16px;
-  background: linear-gradient(140deg, #dff1ff, #bfe4ff);
-  color: var(--sky-700);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9);
+.stats__grid--second {
+  grid-template-columns: minmax(0, 1.25fr) minmax(0, 0.9fr);
 }
 
-.stats-start h2 {
-  margin: 4px 0 5px;
-  font-family: 'Baloo 2', 'Be Vietnam Pro', sans-serif;
-  font-size: clamp(1rem, 1.5vw, 1.2rem);
-  font-weight: 700;
-  color: var(--stats-ink);
+.stats-chart,
+.stats-skills {
+  min-width: 0;
 }
 
-.stats-start p {
-  max-width: 62ch;
-  font-size: 0.8rem;
-  line-height: 1.65;
-  color: #5c7b90;
-}
-
-.stats-start__actions {
+.stats-bars {
   display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  justify-content: flex-end;
+  align-items: flex-end;
+  gap: 4px;
+  height: 190px;
+  padding-top: 12px;
 }
 
-/* ---------- KPI ---------- */
-.stats-kpis {
-  display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr)) minmax(0, 1.25fr);
-  gap: 10px;
-  margin-bottom: 16px;
-}
-
-.stats-kpi {
-  position: relative;
+.stats-bars__col {
+  flex: 1;
   display: flex;
   flex-direction: column;
+  align-items: center;
   gap: 4px;
   min-width: 0;
-  padding: 14px 15px;
-  border: 1px solid rgba(255, 255, 255, 0.94);
-  border-radius: 20px;
-  background: linear-gradient(165deg, rgba(255, 255, 255, 0.97), rgba(246, 251, 255, 0.9));
-  box-shadow: 0 20px 46px -40px rgba(14, 71, 115, 0.55);
-  overflow: hidden;
-  animation: fadeUp 0.6s var(--ease-out) both;
-}
-
-.stats-kpi::after {
-  content: '';
-  position: absolute;
-  inset: auto -30% -70% auto;
-  width: 120px;
-  height: 120px;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(123, 189, 240, 0.16), transparent 68%);
-  pointer-events: none;
-}
-
-.stats-kpi:nth-child(2) { animation-delay: 0.04s; }
-.stats-kpi:nth-child(3) { animation-delay: 0.08s; }
-.stats-kpi:nth-child(4) { animation-delay: 0.12s; }
-.stats-kpi:nth-child(5) { animation-delay: 0.16s; }
-.stats-kpi:nth-child(6) { animation-delay: 0.2s; }
-
-.stats-kpi__icon {
-  display: grid;
-  place-items: center;
-  width: 32px;
-  height: 32px;
-  margin-bottom: 6px;
-  border-radius: 10px;
-  background: var(--sky-100);
-  color: var(--sky-700);
-}
-
-.stats-kpi--warm .stats-kpi__icon {
-  background: var(--warm-soft);
-  color: #c96a2d;
-}
-
-.stats-kpi--mint .stats-kpi__icon {
-  background: var(--mint-soft);
-  color: #1f8a73;
-}
-
-.stats-kpi__label {
-  font-size: 0.66rem;
-  font-weight: 600;
-  letter-spacing: 0.04em;
-  color: var(--stats-soft);
-}
-
-.stats-kpi__value {
-  font-family: 'Baloo 2', 'Be Vietnam Pro', sans-serif;
-  font-size: clamp(1.3rem, 1.9vw, 1.62rem);
-  font-weight: 700;
-  line-height: 1.1;
-  color: var(--stats-ink);
-  font-variant-numeric: tabular-nums;
-}
-
-.stats-kpi__value em {
-  margin-left: 4px;
-  font-family: 'Be Vietnam Pro', sans-serif;
-  font-size: 0.64rem;
-  font-style: normal;
-  font-weight: 600;
-  color: var(--stats-soft);
-}
-
-.stats-kpi__hint {
-  font-size: 0.63rem;
-  line-height: 1.4;
-  color: #87a0b1;
-}
-
-.stats-kpi--goal {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  gap: 13px;
-  padding: 13px 16px;
-  border-color: rgba(123, 189, 240, 0.4);
-  background:
-    radial-gradient(120% 140% at 100% 0%, rgba(190, 228, 255, 0.42), transparent 60%),
-    linear-gradient(165deg, #ffffff, #f2faff);
-}
-
-.stats-kpi--goal > div:last-child {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  min-width: 0;
-}
-
-.stats-goal-ring {
-  position: relative;
-  display: grid;
-  place-items: center;
-  width: 58px;
-  height: 58px;
-  flex: none;
-}
-
-.stats-goal-ring svg {
-  position: absolute;
-  inset: 0;
-  width: 100%;
   height: 100%;
-  transform: rotate(-90deg);
 }
 
-.stats-goal-ring circle {
-  fill: none;
-  stroke-width: 7;
+.stats-bars__col > span {
+  color: var(--mut);
+  font-size: 0.58rem;
+  font-weight: 800;
+  height: 12px;
 }
 
-.stats-goal-ring__track {
-  stroke: rgba(123, 189, 240, 0.22);
-}
-
-.stats-goal-ring__value {
-  stroke: #45a3e6;
-  stroke-linecap: round;
-  transition: stroke-dashoffset 0.8s var(--ease-out);
-}
-
-.stats-goal-ring span {
+.stats-bars__track {
   position: relative;
-  font-size: 0.72rem;
+  flex: 1;
+  width: 100%;
+  max-width: 22px;
+  border-radius: 7px;
+  background: var(--sky);
+  overflow: hidden;
+}
+
+.stats-bars__track i {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  display: block;
+  width: 100%;
+  border-radius: 7px 7px 3px 3px;
+  background: #9dcdf0;
+  transition: height 0.3s ease;
+}
+
+.stats-bars__track i b {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  display: block;
+  width: 100%;
+  border-radius: 0 0 3px 3px;
+  background: var(--pri);
+}
+
+.stats-bars__col em {
+  color: var(--mut);
+  font-size: 0.56rem;
+  font-style: normal;
   font-weight: 700;
-  color: var(--sky-700);
-  font-variant-numeric: tabular-nums;
-}
-
-/* ---------- Bố cục chính ---------- */
-.stats-main {
-  display: grid;
-  grid-template-columns: minmax(0, 1.65fr) minmax(0, 1fr);
-  gap: 16px;
-  align-items: start;
-}
-
-.stats-col {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  min-width: 0;
-}
-
-.stats-col--side {
-  align-self: start;
-}
-
-.stats-chart-card {
-  animation: fadeUp 0.6s var(--ease-out) 0.1s both;
-}
-
-.stats-chart-card__head {
-  align-items: flex-start;
-  gap: 14px;
-  flex-wrap: wrap;
-}
-
-.stats-periods {
-  display: flex;
-  gap: 4px;
-  padding: 3px;
-  border-radius: 999px;
-  background: rgba(236, 246, 255, 0.86);
-  border: 1px solid rgba(123, 189, 240, 0.22);
-}
-
-.stats-periods .page-tab {
-  padding: 5px 10px;
-}
-
-.stats-periods .page-tab.is-active {
-  background: #ffffff;
-  box-shadow: 0 6px 14px -12px rgba(28, 111, 178, 0.8);
-}
-
-.stats-chart-meta {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 8px 16px;
-  margin-top: 14px;
-  font-size: 0.7rem;
-  color: var(--stats-soft);
-}
-
-.stats-chart-meta b {
-  color: var(--stats-ink);
-  font-size: 0.82rem;
-  font-variant-numeric: tabular-nums;
 }
 
 .stats-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 10px;
+  color: var(--mut);
+  font-size: 0.66rem;
+  font-weight: 700;
+}
+
+.stats-legend span {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
-  margin-left: auto;
-  color: #6f899c;
+  gap: 4px;
 }
 
 .stats-legend i {
-  width: 8px;
-  height: 8px;
+  width: 10px;
+  height: 10px;
   border-radius: 3px;
 }
 
-.stats-legend__learned {
-  background: linear-gradient(180deg, #7bc7f7, #3f9fe8);
-}
-
-.stats-legend__reviewed {
-  background: linear-gradient(180deg, #a8dfd2, #4fb9a2);
-  margin-left: 8px;
-}
-
-/* ---------- Biểu đồ cột ---------- */
-.stats-chart {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  margin-top: 14px;
-  padding: 8px 2px 0;
-  transition: opacity 0.25s ease;
-}
-
-.stats-chart.is-loading {
-  opacity: 0.55;
-}
-
-.stats-chart__grid {
-  position: absolute;
-  inset: 8px 0 22px;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  pointer-events: none;
-}
-
-.stats-chart__grid span {
-  display: block;
-  border-top: 1px dashed rgba(123, 189, 240, 0.22);
-}
-
-.stats-chart__bars {
-  position: relative;
-  display: flex;
-  align-items: stretch;
-  gap: 3px;
-  height: clamp(150px, 19vw, 208px);
-}
-
-.stats-bar {
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
-  align-items: center;
-  gap: 6px;
-  flex: 1 1 0;
-  min-width: 0;
-  height: 100%;
-}
-
-.stats-bar__track {
-  display: flex;
-  align-items: flex-end;
-  width: 100%;
-  height: 100%;
-  border-radius: 7px;
-  background: rgba(123, 189, 240, 0.07);
-  transition: background 0.2s ease;
-}
-
-.stats-bar:hover .stats-bar__track {
-  background: rgba(123, 189, 240, 0.16);
-}
-
-.stats-bar__fill {
-  display: flex;
-  flex-direction: column-reverse;
-  width: 100%;
-  min-height: 0;
-  border-radius: 7px;
-  overflow: hidden;
-  transform-origin: bottom;
-  transition: height 0.6s var(--ease-out);
-}
-
-.stats-bar.is-goal .stats-bar__fill {
-  box-shadow: 0 0 0 1.5px rgba(255, 255, 255, 0.85), 0 0 12px rgba(84, 178, 240, 0.55);
-}
-
-.stats-bar__learned {
-  background: linear-gradient(180deg, #7bc7f7, #3f9fe8);
-  min-height: 0;
-}
-
-.stats-bar__reviewed {
-  background: linear-gradient(180deg, #a8dfd2, #4fb9a2);
-  min-height: 0;
-}
-
-.stats-bar__label {
-  font-size: 0.56rem;
-  font-weight: 600;
-  color: #93aab9;
-  white-space: nowrap;
-  height: 12px;
-  font-variant-numeric: tabular-nums;
-}
-
-.stats-chart__spinner {
-  position: absolute;
-  top: 44%;
-  left: 50%;
-  margin: -12px 0 0 -12px;
-}
-
-.stats-chart-empty {
-  margin-top: 12px;
-  padding: 10px 12px;
-  border-radius: 12px;
-  background: rgba(240, 248, 255, 0.7);
-  font-size: 0.74rem;
-  line-height: 1.6;
-  color: #6d8ca3;
-  text-align: center;
-}
-
-/* ---------- Kỹ năng ---------- */
-.stats-side {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  min-width: 0;
-}
-
-.stats-skills-card {
-  animation: fadeUp 0.6s var(--ease-out) 0.16s both;
-}
-
-.stats-radar {
-  margin: 6px auto 2px;
-  max-width: 360px;
-}
-
-.stats-radar svg {
-  display: block;
-  width: 100%;
-  height: auto;
-  overflow: visible;
-}
-
-.stats-radar__grid {
-  fill: rgba(123, 189, 240, 0.05);
-  stroke: rgba(123, 189, 240, 0.28);
-  stroke-width: 1;
-}
-
-.stats-radar__axis {
-  stroke: rgba(123, 189, 240, 0.24);
-  stroke-width: 1;
-}
-
-.stats-radar__area {
-  fill: rgba(84, 170, 235, 0.22);
-  stroke: #3f9fe8;
-  stroke-width: 2;
-  stroke-linejoin: round;
-  animation: radarIn 0.9s var(--ease-out) both;
-  transform-origin: 180px 150px;
-}
-
-@keyframes radarIn {
-  from {
-    opacity: 0;
-    transform: scale(0.55);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
-
-.stats-radar__dot {
-  fill: #ffffff;
-  stroke: #2f8ed8;
-  stroke-width: 2;
-}
-
-.stats-radar__label {
-  fill: #5c7b90;
-  font-family: 'Be Vietnam Pro', sans-serif;
-  font-size: 10.5px;
-  font-weight: 600;
-}
+.stats-legend i.is-new { background: var(--pri); }
+.stats-legend i.is-review { background: #9dcdf0; }
 
 .stats-skill-list {
   display: flex;
   flex-direction: column;
   gap: 9px;
-  margin-top: 6px;
+  margin-top: 4px;
 }
 
-.stats-skill__head {
+.stats-skill > div:first-child {
   display: flex;
   align-items: baseline;
   justify-content: space-between;
   gap: 8px;
-  margin-bottom: 4px;
+  margin-bottom: 3px;
+  color: var(--tx);
   font-size: 0.72rem;
-  color: #5c7b90;
+  font-weight: 700;
 }
 
-.stats-skill__head strong {
-  color: var(--stats-ink);
-  font-size: 0.74rem;
-  font-variant-numeric: tabular-nums;
+.stats-skill strong {
+  color: var(--pri);
+  font-size: 0.76rem;
 }
 
-.stats-skill__track {
-  display: block;
-  height: 6px;
-  border-radius: 999px;
-  background: rgba(123, 189, 240, 0.16);
-  overflow: hidden;
-}
-
-.stats-skill__fill {
-  display: block;
-  height: 100%;
-  border-radius: inherit;
-  background: linear-gradient(90deg, #8fd2f8, #3f9fe8);
-  transition: width 0.8s var(--ease-out);
-}
-
-.stats-skill-balance {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  margin-top: 14px;
-  padding-top: 12px;
-  border-top: 1px dashed rgba(123, 189, 240, 0.3);
-  font-size: 0.68rem;
+.stats-note {
+  color: var(--mut);
+  font-size: 0.66rem;
   line-height: 1.5;
-  color: #6f899c;
 }
 
-.stats-skill-balance svg {
-  flex: none;
-  color: #4fa5e0;
+.stats-skills .stats-note {
+  margin-top: 10px;
 }
 
-.stats-skill-pair {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px 16px;
-  margin-top: 14px;
-  padding-top: 12px;
-  border-top: 1px dashed rgba(123, 189, 240, 0.3);
-  font-size: 0.68rem;
-  color: #6f899c;
-}
-
-.stats-skill-pair span {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-}
-
-.stats-skill-pair svg {
-  color: #c99a3c;
-}
-
-.stats-skill-pair span:last-child svg {
-  color: #4fa5e0;
-}
-
-.stats-skill-pair b {
-  color: var(--stats-ink);
-}
-
-/* ---------- Nửa dưới ---------- */
-.stats-lower {
+.heatmap {
   display: grid;
-  grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
-  gap: 16px;
-  margin-top: 16px;
+  grid-template-columns: repeat(18, minmax(0, 1fr));
+  gap: 3px;
+  margin: 6px 0 8px;
 }
 
-.stats-heatmap-card,
-.stats-sessions-card {
-  animation: fadeUp 0.6s var(--ease-out) 0.2s both;
-}
-
-.stats-heatmap-scroll {
-  margin-top: 14px;
-  overflow-x: auto;
-  padding-bottom: 4px;
-  scrollbar-width: thin;
-}
-
-.stats-heatmap {
-  display: flex;
-  gap: 4px;
-  min-width: min-content;
-}
-
-.stats-heatmap__week {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.stats-heatmap__cell {
-  display: block;
-  width: clamp(11px, 0.95vw, 15px);
+.heatmap__cell {
   aspect-ratio: 1;
-  border-radius: 3.5px;
-  background: rgba(123, 189, 240, 0.1);
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  border-radius: 3px;
+  background: var(--sky);
+  box-shadow: inset 0 0 0 1px var(--ln);
 }
 
-.stats-heatmap__cell:hover {
-  transform: scale(1.28);
-  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.9);
-}
-
-.stats-heatmap__cell.is-empty {
-  background: transparent;
-  pointer-events: none;
-}
-
-.stats-heatmap__cell.level-0 { background: rgba(123, 189, 240, 0.12); }
-.stats-heatmap__cell.level-1 { background: #cfe9fc; }
-.stats-heatmap__cell.level-2 { background: #97cff6; }
-.stats-heatmap__cell.level-3 { background: #56aeea; }
-.stats-heatmap__cell.level-4 { background: #2a7fc0; }
-
-.stats-heatmap__foot {
+.heatmap__legend {
   display: flex;
   align-items: center;
+  justify-content: flex-end;
   gap: 4px;
-  margin-top: 12px;
-  font-size: 0.62rem;
-  color: #87a0b1;
+  color: var(--mut);
+  font-size: 0.6rem;
 }
 
-.stats-heatmap__foot i {
-  width: 11px;
-  aspect-ratio: 1;
-  border-radius: 3.5px;
+.heatmap__legend i {
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+  background: var(--sky);
 }
 
-.stats-heatmap__foot span:first-child {
-  margin-right: 4px;
-}
+.stats .level-0 { background: var(--sky); }
+.stats .level-1 { background: #c7e6fa; }
+.stats .level-2 { background: #8fc9ee; }
+.stats .level-3 { background: #5aa9e0; }
+.stats .level-4 { background: var(--pri); }
 
-.stats-heatmap__foot span:last-child {
-  margin-left: 4px;
-}
-
-/* ---------- Phiên gần đây ---------- */
 .stats-sessions {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  margin-top: 14px;
+  gap: 4px;
 }
 
-.stats-session {
+.stats-sessions > div {
   display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 9px 10px;
-  border-radius: 14px;
-  background: rgba(243, 250, 255, 0.72);
-  border: 1px solid transparent;
-  transition: border-color 0.2s ease, background 0.2s ease;
-}
-
-.stats-session:hover {
-  border-color: rgba(123, 189, 240, 0.28);
-  background: #ffffff;
-}
-
-.stats-session__icon {
-  display: grid;
-  place-items: center;
-  width: 32px;
-  height: 32px;
-  flex: none;
-  border-radius: 10px;
-  background: var(--sky-100);
-  color: var(--sky-700);
-}
-
-.stats-session__icon.is-review {
-  background: var(--mint-soft);
-  color: #1f8a73;
-}
-
-.stats-session__copy {
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
-  flex: 1;
-}
-
-.stats-session__copy strong {
-  font-size: 0.76rem;
-  font-weight: 600;
-  color: var(--stats-ink);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.stats-session__copy span {
-  font-size: 0.63rem;
-  color: #87a0b1;
-}
-
-.stats-session__score {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  flex: none;
-}
-
-.stats-session__score b {
-  font-size: 0.8rem;
-  color: var(--sky-700);
-  font-variant-numeric: tabular-nums;
-}
-
-.stats-session__score span {
-  font-size: 0.6rem;
-  color: #93aab9;
-  font-variant-numeric: tabular-nums;
-}
-
-.stats-empty-note {
-  margin-top: 14px;
-  padding: 14px;
-  border-radius: 14px;
-  background: rgba(240, 248, 255, 0.7);
-  font-size: 0.74rem;
-  line-height: 1.6;
-  color: #6d8ca3;
-  text-align: center;
-}
-
-/* ---------- Chân trang ---------- */
-.stats-footnote {
-  display: flex;
-  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  gap: 8px 18px;
-  margin: 14px 0 4px;
-  padding: 11px 4px;
-  font-size: 0.66rem;
-  color: #87a0b1;
+  gap: 8px;
+  padding: 7px 0;
+  border-top: 1.5px dashed var(--ln);
 }
 
-.stats-footnote span {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
+.stats-sessions > div:first-child {
+  border-top: 0;
+  padding-top: 0;
 }
 
-.stats-footnote svg {
-  color: var(--mint);
+.stats-sessions span {
+  display: flex;
+  flex-direction: column;
+  color: var(--tx);
+  font-size: 0.74rem;
+  font-weight: 700;
 }
 
-/* ---------- Tablet ---------- */
-@media (max-width: 1080px) {
-  .stats-kpis {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-
-  .stats-kpi--goal {
-    grid-column: span 3;
-  }
-
-  .stats-main {
-    grid-template-columns: minmax(0, 1fr);
-  }
+.stats-sessions em {
+  color: var(--mut);
+  font-size: 0.62rem;
+  font-style: normal;
 }
 
-@media (max-width: 760px) {
-  .stats-start {
-    grid-template-columns: auto minmax(0, 1fr);
-    align-items: flex-start;
-  }
-
-  .stats-start__actions {
-    grid-column: 1 / -1;
-    justify-content: flex-start;
-  }
-
-  .stats-kpis {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .stats-kpi--goal {
-    grid-column: span 2;
-  }
+.stats-sessions strong {
+  color: var(--mut);
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-align: right;
 }
 
-@media (max-width: 420px) {
-  .stats-kpis {
-    grid-template-columns: minmax(0, 1fr);
-  }
-
-  .stats-kpi--goal {
-    grid-column: auto;
-  }
-
-  .stats-chart__bars {
-    gap: 2px;
-    height: 150px;
-  }
-
-  .stats-chart-meta {
-    gap: 6px 10px;
-  }
-
-  .stats-legend {
-    margin-left: 0;
-  }
-
-  .stats-bar__label {
-    font-size: 0.5rem;
-  }
+.stats-empty {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  margin-top: 12px;
+  color: var(--mut);
+  font-size: 0.78rem;
 }
 
-/* ---------- Màn hình lớn ---------- */
-@media (min-width: 1700px) {
-  .stats-kpis {
-    gap: 14px;
-  }
-
-  .stats-kpi {
-    padding: 18px 19px;
-    border-radius: 24px;
-  }
-
-  .stats-kpi__value {
-    font-size: 1.95rem;
-  }
-
-  .stats-chart__bars {
-    height: 250px;
-  }
-
-  .stats-main,
-  .stats-col {
-    gap: 22px;
-  }
-
-  .stats-main {
-    margin-top: 4px;
-  }
+.stats-empty svg {
+  flex: none;
+  color: var(--pri);
+  margin-top: 1px;
 }
 
-@media (min-width: 2300px) {
-  .stats-kpi__value {
-    font-size: 2.4rem;
+@media (max-width: 900px) {
+  .stats__grid,
+  .stats__grid--second {
+    grid-template-columns: 1fr;
   }
 
-  .stats-chart__bars {
-    height: 320px;
-  }
-
-  .stats-radar {
-    max-width: 460px;
-  }
-
-  .stats-heatmap__cell {
-    width: 18px;
-  }
-}
-
-@media (min-width: 3000px) {
-  .stats-kpi__value {
-    font-size: 2.9rem;
-  }
-
-  .stats-chart__bars {
-    height: 400px;
-  }
-
-  .stats-radar {
-    max-width: 560px;
-  }
-
-  .stats-radar__label {
-    font-size: 14px;
-  }
-
-  .stats-heatmap__cell {
-    width: 22px;
-  }
-
-  .stats-session {
-    padding: 13px 14px;
-  }
-
-  .stats-session__copy strong {
-    font-size: 0.95rem;
+  .heatmap {
+    grid-template-columns: repeat(15, minmax(0, 1fr));
   }
 }

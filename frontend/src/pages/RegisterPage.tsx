@@ -1,19 +1,15 @@
 import { useMemo, useState, type FormEvent } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
-import { AuthLayout } from '../components/AuthLayout'
-import {
-  ArrowRightIcon,
-  CheckIcon,
-  GraduationIcon,
-  MailIcon,
-  SparkIcon,
-  TargetIcon,
-  UserIcon,
-} from '../components/Icons'
-import { PasswordField } from '../components/PasswordField'
+import { AuthShell } from '../components/layout/AuthShell'
+import { Button } from '../components/ui/Button'
+import { Chip } from '../components/ui/Chip'
+import { FeedbackBar } from '../components/ui/FeedbackBar'
+import { Input } from '../components/ui/Input'
+import { ArrowRightIcon, CheckIcon, MailIcon, SparkIcon, UserIcon } from '../components/Icons'
 import { ApiError } from '../lib/api'
 import { useAuth } from '../lib/AuthContext'
 import {
+  LEVEL_CHOICES,
   levelInfo,
   purposeInfo,
   sourceLabel,
@@ -22,53 +18,17 @@ import {
 } from '../lib/personalization'
 import '../styles/auth.css'
 
+const GOALS = [10, 20, 30, 50]
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 const NAME_PATTERN = /^[\p{L}\p{M}]+(?: [\p{L}\p{M}]+)*$/u
 const SPECIAL_CHAR_PATTERN = /[^A-Za-z0-9\s]/
-const MAX_NAME_LENGTH = 30
-const MAX_PASSWORD_LENGTH = 20
 
-const LEVELS = [
-  { id: 1, code: 'A1', label: 'Sơ cấp' },
-  { id: 2, code: 'A2', label: 'Cơ bản' },
-  { id: 3, code: 'B1', label: 'Trung cấp' },
-  { id: 4, code: 'B2', label: 'Trung cao' },
-  { id: 5, code: 'C1', label: 'Cao cấp' },
-  { id: 6, code: 'C2', label: 'Thành thạo' },
-]
-
-const GOALS = [10, 20, 30, 50] as const
-
-type FieldErrors = {
-  displayName?: string
-  email?: string
-  password?: string
-  confirm?: string
-  terms?: string
-}
-
-type LocationState = {
-  onboarding?: Partial<OnboardingAnswers>
-}
-
-function passwordScore(value: string): number {
-  let score = 0
-  if (value.length >= 8) score += 1
-  if (value.length >= 12) score += 1
-  if (/[a-z]/.test(value) && /[A-Z]/.test(value)) score += 1
-  if (/\d/.test(value)) score += 1
-  if (/[^A-Za-z0-9]/.test(value)) score += 1
-  return Math.min(4, value.length === 0 ? 0 : score)
-}
-
-const STRENGTH_LABELS = ['Quá ngắn', 'Yếu', 'Ổn', 'Khá mạnh', 'Rất mạnh']
+type LocationState = { onboarding?: Partial<OnboardingAnswers> }
 
 export function RegisterPage() {
   const navigate = useNavigate()
   const location = useLocation()
   const { register } = useAuth()
-
-  // Câu trả lời từ trang onboarding (nếu người dùng đi qua bước hỏi thông tin).
   const answers = (location.state as LocationState | null)?.onboarding ?? null
   const chosenLevel = levelInfo(answers?.levelId ?? null)
   const chosenPurpose = purposeInfo(answers?.purpose ?? null)
@@ -85,218 +45,148 @@ export function RegisterPage() {
   const [terms, setTerms] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
-  const [fieldErrors, setFieldErrors] = useState<FieldErrors>({})
 
-  const strength = useMemo(() => passwordScore(password), [password])
-  const strengthLabel = password.length === 0 ? '' : STRENGTH_LABELS[strength]
+  const programTitle = useMemo(() => {
+    if (chosenPurpose) return chosenPurpose.program
+    if (chosenLevel) return `Lộ trình ${chosenLevel.code} của bạn`
+    return 'Lộ trình tiếng Anh của bạn'
+  }, [chosenLevel, chosenPurpose])
 
-  function validate(): boolean {
-    const next: FieldErrors = {}
-    const name = displayName.trim()
-
-    if (!name) next.displayName = 'Bạn cho SkyWord biết tên gọi nhé.'
-    else if (name.length < 2) next.displayName = 'Tên gọi cần ít nhất 2 ký tự.'
-    else if (name.length > MAX_NAME_LENGTH) {
-      next.displayName = `Tên gọi tối đa ${MAX_NAME_LENGTH} ký tự.`
-    } else if (!NAME_PATTERN.test(name)) {
-      next.displayName = 'Tên gọi chỉ được chứa chữ cái và khoảng trắng, không có số hoặc ký tự đặc biệt.'
-    }
-
-    if (!email.trim()) next.email = 'Email là thông tin bắt buộc.'
-    else if (!EMAIL_PATTERN.test(email.trim())) next.email = 'Email chưa đúng định dạng.'
-
-    if (!password) next.password = 'Bạn tạo một mật khẩu nhé.'
-    else if (password.length < 8) next.password = 'Mật khẩu cần ít nhất 8 ký tự.'
-    else if (password.length > MAX_PASSWORD_LENGTH) {
-      next.password = `Mật khẩu tối đa ${MAX_PASSWORD_LENGTH} ký tự.`
-    } else if (!SPECIAL_CHAR_PATTERN.test(password)) {
-      next.password = 'Mật khẩu cần ít nhất 1 ký tự đặc biệt, ví dụ @, #, !.'
-    }
-
-    if (!confirm) next.confirm = 'Bạn nhập lại mật khẩu để xác nhận.'
-    else if (confirm.length > MAX_PASSWORD_LENGTH) {
-      next.confirm = `Mật khẩu nhập lại tối đa ${MAX_PASSWORD_LENGTH} ký tự.`
-    } else if (confirm !== password) next.confirm = 'Hai mật khẩu chưa khớp nhau.'
-
-    if (!terms) next.terms = 'Bạn cần đồng ý điều khoản để tạo tài khoản.'
-
-    setFieldErrors(next)
-    return Object.keys(next).length === 0
+  function cleanName(value: string) {
+    return value.replace(/[^\p{L}\p{M}\s]/gu, '').replace(/\s+/g, ' ').slice(0, 30)
   }
 
-  function handleNameChange(value: string) {
-    // Chỉ giữ chữ cái (kể cả tiếng Việt) và khoảng trắng, gộp khoảng trắng liên tiếp.
-    const cleaned = value.replace(/[^\p{L}\p{M}\s]/gu, '').replace(/\s+/g, ' ')
-    setDisplayName(cleaned.slice(0, MAX_NAME_LENGTH))
-  }
-
-  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function submit(event: FormEvent) {
     event.preventDefault()
     setError('')
-    if (!validate() || loading) return
+    const name = displayName.trim()
+    if (name.length < 2) {
+      setError('Tên gọi cần ít nhất 2 ký tự.')
+      return
+    }
+    if (!NAME_PATTERN.test(name)) {
+      setError('Tên gọi chỉ gồm chữ cái và khoảng trắng, không có số/ký tự đặc biệt.')
+      return
+    }
+    if (!EMAIL_PATTERN.test(email.trim())) {
+      setError('Email chưa đúng định dạng.')
+      return
+    }
+    if (password.length < 8 || password.length > 20) {
+      setError('Mật khẩu cần từ 8 đến 20 ký tự.')
+      return
+    }
+    if (!SPECIAL_CHAR_PATTERN.test(password)) {
+      setError('Mật khẩu cần ít nhất 1 ký tự đặc biệt, ví dụ @, #, !.')
+      return
+    }
+    if (password !== confirm) {
+      setError('Hai mật khẩu chưa khớp nhau.')
+      return
+    }
+    if (!terms) {
+      setError('Bạn cần đồng ý điều khoản để tạo tài khoản.')
+      return
+    }
 
     setLoading(true)
-    const normalizedEmail = email.trim().toLowerCase()
+    const normalized = email.trim().toLowerCase()
     try {
       await register({
-        displayName,
-        email: normalizedEmail,
+        displayName: name,
+        email: normalized,
         password,
         currentLevelId: levelId,
         dailyWordGoal: goal,
         learningPurpose: answers?.purpose ?? undefined,
         referralSource: answers?.source ?? undefined,
       })
-      // Tạo xong tài khoản thì chuyển sang đăng nhập, điền sẵn email vừa đăng ký.
       navigate('/login', {
         replace: true,
-        state: { email: normalizedEmail, justRegistered: true },
+        state: { email: normalized, justRegistered: true },
       })
     } catch (caught) {
-      setError(
-        caught instanceof ApiError
-          ? caught.message
-          : 'Chưa thể tạo tài khoản lúc này. Vui lòng thử lại.',
-      )
+      setError(caught instanceof ApiError ? caught.message : 'Chưa tạo được tài khoản. Vui lòng thử lại.')
     } finally {
       setLoading(false)
     }
   }
 
   return (
-    <AuthLayout variant="register">
-      <div className="auth__intro">
-        <span className="eyebrow">
-          <span className="eyebrow__dot" />
-          Bắt đầu hành trình
-        </span>
-        <h1>Tạo tài khoản của bạn</h1>
-        <p>Chỉ mất một phút để bầu trời tiếng Anh của bạn được mở ra.</p>
-      </div>
-
-      {hasOnboarding ? (
-        <div className="reg-persona" aria-label="Lộ trình gợi ý từ câu trả lời của bạn">
-          <div className="reg-persona__top">
-            <span className="reg-persona__eyebrow">
-              <SparkIcon size={14} />
-              Lộ trình dành riêng bạn
-            </span>
-            <Link
-              to="/onboarding"
-              state={{ onboarding: answers }}
-              className="reg-persona__edit"
-            >
-              Đổi câu trả lời
-            </Link>
-          </div>
-          <strong className="reg-persona__title">
-            {chosenPurpose?.program ?? 'Chương trình theo trình độ của bạn'}
-          </strong>
-          <div className="reg-persona__chips">
-            {chosenLevel ? <span>{chosenLevel.code} · {chosenLevel.label}</span> : null}
-            {chosenPurpose ? <span>{chosenPurpose.label}</span> : null}
-            {answers?.source ? <span>Biết qua {sourceLabel(answers.source)}</span> : null}
-            <span>{goal} từ/ngày</span>
-          </div>
-          <p>
-            {chosenPurpose?.tagline ??
-              'SkyWord dùng trình độ bạn chọn để chọn độ khó và nhịp học phù hợp.'}
-          </p>
-        </div>
-      ) : null}
-
-      <form className="auth-form" onSubmit={handleSubmit} noValidate>
-        {error ? (
-          <div className="form-alert" role="alert">
-            <SparkIcon size={17} />
-            <span>{error}</span>
+    <AuthShell
+      pose="wave"
+      eyebrow="Bắt đầu hành trình"
+      title={<>Tạo tài khoản <span style={{ color: 'var(--pri)' }}>SkyWorld</span></>}
+      lead="Một phút để Nimbo chuẩn bị lộ trình đúng trình độ và mục tiêu của bạn."
+    >
+      <form className="auth-form" onSubmit={submit} noValidate>
+        {hasOnboarding ? (
+          <div className="auth-persona">
+            <div className="auth-persona__top">
+              <span><SparkIcon size={13} /> Lộ trình dành riêng bạn</span>
+              <Link to="/onboarding" state={{ onboarding: answers }}>Đổi câu trả lời</Link>
+            </div>
+            <strong>{programTitle}</strong>
+            <div className="auth-persona__chips">
+              {chosenLevel ? <Chip tone="line">{chosenLevel.code} · {chosenLevel.label}</Chip> : null}
+              {chosenPurpose ? <Chip tone="gold">{chosenPurpose.label}</Chip> : null}
+              {answers?.source ? <Chip tone="line">Biết qua {sourceLabel(answers.source)}</Chip> : null}
+              <Chip>{goal} từ/ngày</Chip>
+            </div>
           </div>
         ) : null}
 
-        <label className="field" htmlFor="register-name">
-          <span className="field__label">Tên gọi</span>
-          <span className={`field__control${fieldErrors.displayName ? ' is-invalid' : ''}`}>
-            <UserIcon size={19} className="field__icon" />
-            <input
-              id="register-name"
-              name="displayName"
-              type="text"
-              value={displayName}
-              onChange={(event) => handleNameChange(event.target.value)}
-              placeholder="Ví dụ: Minh Anh"
-              autoComplete="nickname"
-              maxLength={MAX_NAME_LENGTH}
-              autoFocus
+        {error ? <FeedbackBar tone="bad">{error}</FeedbackBar> : null}
+
+        <Input
+          label="Tên gọi"
+          value={displayName}
+          onChange={(event) => setDisplayName(cleanName(event.target.value))}
+          placeholder="Ví dụ: Minh Anh"
+          autoComplete="nickname"
+          icon={<UserIcon size={18} />}
+          maxLength={30}
+          autoFocus
+          disabled={loading}
+          hint="Chỉ chữ cái và khoảng trắng, tối đa 30 ký tự."
+        />
+        <Input
+          label="Email"
+          type="email"
+          value={email}
+          onChange={(event) => setEmail(event.target.value)}
+          placeholder="ban@skyworld.vn"
+          autoComplete="email"
+          icon={<MailIcon size={18} />}
+          disabled={loading}
+        />
+
+        <div className="page-grid">
+          <div className="field">
+            <label htmlFor="register-level">Trình độ hiện tại</label>
+            <select
+              id="register-level"
+              value={levelId ?? ''}
+              onChange={(event) => setLevelId(event.target.value ? Number(event.target.value) : null)}
               disabled={loading}
-              aria-invalid={Boolean(fieldErrors.displayName)}
-            />
-          </span>
-          <span className={`field__hint${fieldErrors.displayName ? ' is-error' : ''}`}>
-            {fieldErrors.displayName ?? 'Chỉ chữ cái và khoảng trắng, tối đa 30 ký tự.'}
-          </span>
-        </label>
-
-        <label className="field" htmlFor="register-email">
-          <span className="field__label">Email</span>
-          <span className={`field__control${fieldErrors.email ? ' is-invalid' : ''}`}>
-            <MailIcon size={19} className="field__icon" />
-            <input
-              id="register-email"
-              name="email"
-              type="email"
-              value={email}
-              onChange={(event) => setEmail(event.target.value)}
-              placeholder="ban@skyword.vn"
-              autoComplete="email"
-              inputMode="email"
-              maxLength={256}
-              disabled={loading}
-              aria-invalid={Boolean(fieldErrors.email)}
-            />
-          </span>
-          {fieldErrors.email ? <span className="field__hint is-error">{fieldErrors.email}</span> : null}
-        </label>
-
-        <div className="form-grid">
-          <label className="field" htmlFor="register-level">
-            <span className="field__label">Trình độ hiện tại</span>
-            <span className="field__control field__control--select">
-              <GraduationIcon size={19} className="field__icon" />
-              <select
-                id="register-level"
-                name="level"
-                value={levelId ?? ''}
-                onChange={(event) =>
-                  setLevelId(event.target.value ? Number(event.target.value) : null)
-                }
-                disabled={loading}
-              >
-                <option value="">Để sau</option>
-                {LEVELS.map((level) => (
-                  <option key={level.id} value={level.id}>
-                    {level.code} · {level.label}
-                  </option>
-                ))}
-              </select>
-              <svg className="field__chevron" viewBox="0 0 20 20" aria-hidden="true">
-                <path d="m5 7.5 5 5 5-5" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-            </span>
-          </label>
-
+            >
+              <option value="">Để sau</option>
+              {LEVEL_CHOICES.map((level) => (
+                <option key={level.id} value={level.id}>{level.code} · {level.label}</option>
+              ))}
+            </select>
+          </div>
           <div className="field">
             <span className="field__label">Mục tiêu mỗi ngày</span>
-            <div className="goal-picker" role="group" aria-label="Số từ mới mỗi ngày">
+            <div className="auth-goals">
               {GOALS.map((value) => (
                 <button
                   key={value}
                   type="button"
-                  className={`goal-chip${goal === value ? ' is-active' : ''}`}
+                  className={`chip${goal === value ? ' chip--gold' : ' chip--line'}`}
                   onClick={() => setGoal(value)}
                   disabled={loading}
-                  aria-pressed={goal === value}
                 >
-                  <TargetIcon size={15} />
                   {value}
                 </button>
               ))}
@@ -304,96 +194,52 @@ export function RegisterPage() {
           </div>
         </div>
 
-        <PasswordField
-          id="register-password"
+        <Input
           label="Mật khẩu"
+          type="password"
           value={password}
-          onChange={setPassword}
+          onChange={(event) => setPassword(event.target.value)}
           placeholder="8–20 ký tự, có ký tự đặc biệt"
           autoComplete="new-password"
-          invalid={Boolean(fieldErrors.password)}
-          hint={
-            fieldErrors.password ??
-            'Từ 8 đến 20 ký tự, gồm ít nhất 1 ký tự đặc biệt (ví dụ @, #, !).'
-          }
-          maxLength={MAX_PASSWORD_LENGTH}
+          maxLength={20}
           disabled={loading}
+          hint="Từ 8 đến 20 ký tự, gồm ít nhất 1 ký tự đặc biệt."
         />
-
-        {password ? (
-          <div className={`strength strength--${strength}`} aria-live="polite">
-            <div className="strength__bars" aria-hidden="true">
-              <span />
-              <span />
-              <span />
-              <span />
-            </div>
-            <span className="strength__label">{strengthLabel}</span>
-          </div>
-        ) : null}
-
-        <PasswordField
-          id="register-confirm"
+        <Input
           label="Nhập lại mật khẩu"
+          type="password"
           value={confirm}
-          onChange={setConfirm}
+          onChange={(event) => setConfirm(event.target.value)}
           placeholder="Nhập lại để xác nhận"
           autoComplete="new-password"
-          invalid={Boolean(fieldErrors.confirm)}
-          hint={
-            fieldErrors.confirm ??
-            (confirm && confirm === password
-              ? 'Hai mật khẩu đã khớp.'
-              : 'Tối đa 20 ký tự, giống mật khẩu phía trên.')
-          }
-          maxLength={MAX_PASSWORD_LENGTH}
+          maxLength={20}
           disabled={loading}
         />
 
-        <div className="form-terms">
-          <label className="check check--terms">
-            <input
-              type="checkbox"
-              checked={terms}
-              onChange={(event) => setTerms(event.target.checked)}
-              disabled={loading}
-            />
-            <span className="check__box">
-              <CheckIcon size={13} />
-            </span>
-            <span>
-              Tôi đồng ý với <strong>điều khoản sử dụng</strong> và{' '}
-              <strong>chính sách riêng tư</strong> của SkyWord English.
-            </span>
-          </label>
-          {fieldErrors.terms ? (
-            <span className="field__hint is-error">{fieldErrors.terms}</span>
-          ) : null}
-        </div>
+        <label className="check check--terms">
+          <input
+            type="checkbox"
+            checked={terms}
+            onChange={(event) => setTerms(event.target.checked)}
+            disabled={loading}
+          />
+          <span className="check__box"><CheckIcon size={12} /></span>
+          <span>
+            Tôi đồng ý với <strong>điều khoản sử dụng</strong> và{' '}
+            <strong>chính sách riêng tư</strong> của SkyWorld.
+          </span>
+        </label>
 
-        <button type="submit" className="btn btn--primary" disabled={loading}>
-          {loading ? (
-            <>
-              <span className="spinner" aria-hidden="true" />
-              Đang tạo tài khoản...
-            </>
-          ) : (
-            <>
-              Tạo tài khoản
-              <ArrowRightIcon size={19} />
-            </>
-          )}
-        </button>
+        <Button type="submit" block disabled={loading}>
+          {loading ? <span className="spinner" /> : <SparkIcon size={16} />}
+          {loading ? 'Đang tạo tài khoản...' : 'TẠO TÀI KHOẢN'}
+          {!loading ? <ArrowRightIcon size={17} /> : null}
+        </Button>
 
-        <p className="form-note">
-          Sau khi tạo tài khoản, bạn sẽ được chuyển tới trang đăng nhập với email
-          điền sẵn. Thông tin của bạn được lưu riêng tư và chỉ dùng cho việc học.
+        <p className="auth-switch">
+          Đã có tài khoản? <Link to="/login">Đăng nhập ngay</Link>
         </p>
       </form>
-
-      <p className="auth__switch">
-        Đã có tài khoản? <Link to="/login">Đăng nhập ngay</Link>
-      </p>
-    </AuthLayout>
+    </AuthShell>
   )
 }
