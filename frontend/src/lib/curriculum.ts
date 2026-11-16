@@ -882,6 +882,47 @@ export const COURSE_UNITS: CourseUnit[] = [
 
 export const ALL_LEVELS: CourseLevel[] = COURSE_UNITS.flatMap((unit) => unit.levels)
 
+export type Phase = 1 | 2 | 3 | 4
+
+export const PHASE_META: Record<
+  Phase,
+  { title: string; subtitle: string; friend: CloudFriendId }
+> = {
+  1: {
+    title: 'Nhận diện',
+    subtitle: 'Chọn nghĩa đúng của từ',
+    friend: 'pip',
+  },
+  2: {
+    title: 'Ghép nối',
+    subtitle: 'Nối từ tiếng Anh với nghĩa',
+    friend: 'misty',
+  },
+  3: {
+    title: 'Sắp xếp',
+    subtitle: 'Xếp từ thành câu hoàn chỉnh',
+    friend: 'lumi',
+  },
+  4: {
+    title: 'Nghe & viết',
+    subtitle: 'Nghe chép và điền từ còn thiếu',
+    friend: 'bibi',
+  },
+}
+
+export const PHASE_ORDER: Phase[] = [1, 2, 3, 4]
+
+export function phaseForExercise(exercise: Exercise): Phase {
+  if (exercise.kind === 'choice') return 1
+  if (exercise.kind === 'match') return 2
+  if (exercise.kind === 'order') return 3
+  return 4
+}
+
+export function exercisesInPhase(level: CourseLevel, phase: Phase): Exercise[] {
+  return level.exercises.filter((exercise) => phaseForExercise(exercise) === phase)
+}
+
 export function levelIndex(levelId: string): number {
   return ALL_LEVELS.findIndex((level) => level.id === levelId)
 }

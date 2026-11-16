@@ -18,6 +18,7 @@ import {
   TargetIcon,
 } from '../components/Icons'
 import { CloudBuddy } from '../components/mascot/CloudBuddy'
+import { LazyLevelMascot } from '../components/mascot/LazyLevelMascot'
 import {
   ApiError,
   generatePlanRequest,
@@ -31,20 +32,25 @@ import { useAppData } from '../components/layout/AppLayout'
 import {
   ALL_LEVELS,
   COURSE_UNITS,
-  EXERCISE_LABEL,
-  exerciseKinds,
+  PHASE_META,
+  PHASE_ORDER,
   levelIndex,
   unitOfLevel,
 } from '../lib/curriculum'
+import { mascotForLevel } from '../lib/mascots'
 import {
   courseSummary,
   firstOpenLevel,
   isLevelDone,
   isLevelUnlocked,
+  levelPhases,
   useCourseProgress,
 } from '../lib/courseProgress'
 import '../styles/learn.css'
 import '../styles/course.css'
+
+const NODE_RING_RADIUS = 41
+const NODE_RING_CIRC = 2 * Math.PI * NODE_RING_RADIUS
 
 export function LearnPage() {
   const { dashboard, loading, error, reload } = useAppData()
@@ -61,6 +67,7 @@ export function LearnPage() {
   const openIndex = firstOpenLevel(progress)
   const openLevel = ALL_LEVELS[openIndex] ?? ALL_LEVELS[0]
   const openUnit = unitOfLevel(openLevel)
+  const openMascot = mascotForLevel(openLevel.id)
   const allDone = summary.done >= summary.total
 
   const loadPlans = useCallback(() => {
@@ -137,8 +144,8 @@ export function LearnPage() {
           </Chip>
           <h2>Học từng level, mở từng nấc thang</h2>
           <p>
-            Mỗi level có 5 dạng bài: trắc nghiệm, ghép cặp, xếp câu, nghe chép và điền từ.
-            Hoàn thành để mở level kế tiếp cùng Nimbo và các bạn mây.
+            Mỗi level có 4 phase: nhận diện, ghép nối, sắp xếp, nghe & viết. Hoàn thành đủ
+            4 phase để làm đầy vòng tròn xanh và mở level kế tiếp.
           </p>
           <div className="course-hero__stats">
             <span><strong>{summary.done}</strong>/{summary.total} level</span>
@@ -153,17 +160,22 @@ export function LearnPage() {
           </div>
         </div>
         <div className="course-hero__art">
-          <div className="course-hero__buddies" aria-hidden="true">
-            <CloudBuddy friend="lumi" size={78} pose="idle" />
-            <CloudBuddy friend="nimbo" size={112} pose="cheer" />
-            <CloudBuddy friend="pip" size={78} pose="idle" />
+          <div className="course-hero__mascot-line" aria-hidden="true">
+            <CloudBuddy friend="lumi" size={44} pose="idle" />
+            <span className="course-hero__mascot-box">
+              <LazyLevelMascot mascot={openMascot.id} quality="full" decorative />
+            </span>
+            <CloudBuddy friend="pip" size={44} pose="idle" />
           </div>
+          <span className="course-hero__mascot-name">
+            {openMascot.name} · Bạn đồng hành level {openIndex + 1}
+          </span>
           <div className="course-hero__bubble">
             <SparkIcon size={14} />
             <p>
               {allDone
                 ? 'Bạn đã đi hết 12 level. Ôn lại để giữ phong độ nhé!'
-                : `${openLevel.title} đang chờ bạn. Chỉ cần 5 phút thôi!`}
+                : `${openMascot.name} đang chờ ở “${openLevel.title}”. Hoàn thành 4 phase để mở level tiếp!`}
             </p>
           </div>
         </div>
@@ -173,7 +185,7 @@ export function LearnPage() {
         <div className="section-head">
           <div>
             <h2>Bản đồ khóa học</h2>
-            <p>Đi lần lượt từng level. Level đã xong có thể chơi lại để lấy trọn 3 sao.</p>
+            <p>Hoàn thành đủ 4 phase để làm đầy vòng tròn xanh và mở level kế. Level đã xong vẫn chơi lại được.</p>
           </div>
           <Chip tone="ok">{summary.done}/{summary.total} đã xong</Chip>
         </div>
@@ -218,22 +230,49 @@ export function LearnPage() {
                   const unlocked = isLevelUnlocked(progress, flat)
                   const current = flat === openIndex && !allDone
                   const stars = progress.levels[level.id]?.stars ?? 0
-                  const kinds = exerciseKinds(level)
+                  const phases = levelPhases(progress, level.id)
+                  const mascot = mascotForLevel(level.id)
                   return (
                     <div
                       className={`course-node pos-${localPosition % 4}${done ? ' is-done' : ''}${
                         unlocked ? '' : ' is-locked'
-                      }${current ? ' is-current' : ''}`}
+                      }${current ? ' is-current' : ''}${phases > 0 && !done ? ' has-progress' : ''}`}
                       key={level.id}
                     >
                       <div className="course-node__bubble-wrap">
-                        {current ? <span className="course-node__start">BẮT ĐẦU</span> : null}
+                        {current ? (
+                          <span className="course-node__start">
+                            {phases > 0 ? `TIẾP PHASE ${phases + 1}` : 'BẮT ĐẦU'}
+                          </span>
+                        ) : null}
+                        {current ? (
+                          <span className="course-node__sparks" aria-hidden="true">
+                            <i>✦</i>
+                            <i>✧</i>
+                            <i>✦</i>
+                          </span>
+                        ) : null}
+                        <svg className="course-node__ring" viewBox="0 0 96 96" aria-hidden="true">
+                          <circle className="course-node__ring-track" cx="48" cy="48" r={NODE_RING_RADIUS} />
+                          <circle
+                            className={`course-node__ring-value${done ? ' is-full' : ''}`}
+                            cx="48"
+                            cy="48"
+                            r={NODE_RING_RADIUS}
+                            strokeDasharray={NODE_RING_CIRC}
+                            strokeDashoffset={NODE_RING_CIRC * (1 - phases / 4)}
+                          />
+                        </svg>
                         <Link
                           to={unlocked ? `/app/lesson/${level.id}` : '/app'}
                           className="course-node__bubble"
                           aria-disabled={!unlocked}
                           aria-label={`${level.title} — ${
-                            done ? `đã hoàn thành ${stars} sao` : unlocked ? 'sẵn sàng học' : 'đang khóa'
+                            done
+                              ? `đã hoàn thành ${stars} sao`
+                              : unlocked
+                                ? `đã xong ${phases} trên 4 phase`
+                                : 'đang khóa'
                           }`}
                           onClick={(event) => {
                             if (!unlocked) event.preventDefault()
@@ -250,20 +289,29 @@ export function LearnPage() {
                         ) : null}
                       </div>
                       <div className="course-node__copy">
-                        <strong>{level.title}</strong>
+                        <div className="course-node__title">
+                          <span className="course-node__mascot">
+                            <LazyLevelMascot mascot={mascot.id} quality="mini" decorative />
+                          </span>
+                          <strong>{level.title}</strong>
+                        </div>
                         <span>{level.subtitle}</span>
                         <div className="course-node__meta">
                           {unlocked ? (
                             <>
-                              <span>{level.exercises.length} câu · {level.xp} XP</span>
-                              <span className="course-node__dots" aria-label={`${kinds.length} dạng bài`}>
-                                {kinds.map((kind) => (
-                                  <i key={kind} title={EXERCISE_LABEL[kind]} />
+                              <span>{phases}/4 phase · {level.xp} XP</span>
+                              <span className="course-node__phase-dots" aria-label={`${phases} trên 4 phase`}>
+                                {PHASE_ORDER.map((phase) => (
+                                  <i
+                                    key={phase}
+                                    className={phase <= phases ? 'on' : ''}
+                                    title={PHASE_META[phase].title}
+                                  />
                                 ))}
                               </span>
                             </>
                           ) : (
-                            <span>Hoàn thành level trước</span>
+                            <span>Hoàn thành đủ 4 phase level trước</span>
                           )}
                         </div>
                       </div>

@@ -401,10 +401,12 @@
   gap: 14px;
 }
 
-@media (max-width: 1240px) {
+/* 3 cột cần ~1374px cho 250 + 760 + 292 + gap; dưới ngưỡng này ẩn rail
+   để trang không bị tràn ngang trên laptop 1280–1440. */
+@media (max-width: 1460px) {
   .app {
     grid-template-columns: 230px minmax(0, 1fr);
-    max-width: 1080px;
+    max-width: 1180px;
   }
 
   .app__rail {

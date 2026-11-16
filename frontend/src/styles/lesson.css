@@ -77,6 +77,100 @@
   transition: width 0.35s ease;
 }
 
+/* Bốn đoạn progress tương ứng 4 phase của level. */
+.lesson__progress--phases {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 4px;
+  padding: 3px;
+}
+
+.lesson__phase-seg {
+  position: relative;
+  height: 100%;
+  overflow: hidden;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--ln) 52%, transparent);
+}
+
+.lesson__phase-seg i {
+  background: linear-gradient(90deg, var(--pri), #6ab6e6);
+}
+
+.lesson__phase-seg.is-full i {
+  background: linear-gradient(90deg, #2f7fbe, #74c4f0);
+}
+
+.phase-pips {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+  margin: 12px 0 2px;
+  padding: 0;
+  list-style: none;
+}
+
+.phase-pip {
+  display: flex;
+  flex: 1 1 0;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+  color: var(--mut);
+}
+
+.phase-pip > span {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border: 2px solid var(--ln);
+  border-radius: 50%;
+  background: var(--card);
+  color: var(--mut);
+  font-size: 0.7rem;
+  font-weight: 900;
+  transition:
+    background 0.25s ease,
+    border-color 0.25s ease,
+    color 0.25s ease,
+    transform 0.25s ease;
+}
+
+.phase-pip em {
+  max-width: 100%;
+  overflow: hidden;
+  font-size: 0.58rem;
+  font-style: normal;
+  font-weight: 800;
+  letter-spacing: 0.03em;
+  line-height: 1.2;
+  text-align: center;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.phase-pip.is-done > span {
+  border-color: var(--pri);
+  background: var(--pri);
+  color: #fff;
+}
+
+.phase-pip.is-current > span {
+  border-color: var(--pri);
+  color: var(--pri);
+  box-shadow: 0 0 0 4px rgba(59, 143, 208, 0.16);
+  animation: phasePulse 1.8s ease-in-out infinite;
+}
+
+.phase-pip.is-current em {
+  color: var(--pri);
+}
+
 .lesson__progress-wrap > span {
   overflow: hidden;
   color: var(--mut);
@@ -111,7 +205,7 @@
 
 .lesson__body {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 302px;
+  grid-template-columns: minmax(0, 1fr) 330px;
   gap: clamp(18px, 3vw, 34px);
   align-items: start;
   padding-top: 22px;
@@ -187,7 +281,7 @@
   display: flex;
   flex-direction: column;
   gap: 8px;
-  min-height: 286px;
+  min-height: 320px;
   padding: 10px;
   border: 2px solid var(--ln);
   border-bottom-width: 5px;
@@ -199,6 +293,59 @@
 
 .lesson__stage .cloud-friends {
   height: 192px;
+}
+
+.lesson__stage-head {
+  height: 284px;
+  overflow: hidden;
+  border-radius: 18px;
+  background:
+    radial-gradient(80% 70% at 50% 18%, rgba(255, 255, 255, 0.72), transparent 72%),
+    color-mix(in srgb, var(--sky) 55%, transparent);
+}
+
+.lesson__stage-head .level-mascot {
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+}
+
+.lesson__stage-tag {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+  text-align: center;
+}
+
+.lesson__stage-tag strong {
+  color: var(--pri);
+  font-family: var(--font-title);
+  font-size: 0.92rem;
+  line-height: 1.2;
+}
+
+.lesson__stage-tag span {
+  color: var(--mut);
+  font-size: 0.6rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.lesson__stage .phase-pips {
+  gap: 3px;
+  margin: 2px 0 4px;
+}
+
+.lesson__stage .phase-pip > span {
+  width: 24px;
+  height: 24px;
+  font-size: 0.62rem;
+}
+
+.lesson__stage .phase-pip em {
+  display: none;
 }
 
 .lesson__speech {
@@ -453,7 +600,9 @@
 }
 
 .lesson--done {
-  display: block;
+  display: grid;
+  align-content: safe center;
+  justify-items: center;
 }
 
 .lesson-done {
@@ -474,6 +623,64 @@
 
 .lesson-done__stage .cloud-friends {
   height: 100%;
+}
+
+.lesson-done__stage--mascot {
+  display: grid;
+  place-items: end center;
+  height: 330px;
+  overflow: hidden;
+  border-radius: 26px;
+  background:
+    radial-gradient(72% 68% at 50% 20%, rgba(255, 255, 255, 0.66), transparent 70%),
+    radial-gradient(90% 80% at 50% 100%, rgba(59, 143, 208, 0.1), transparent 70%);
+}
+
+.lesson-done__stage--mascot .level-mascot {
+  width: min(520px, 100%);
+  height: 100%;
+  min-height: 0;
+}
+
+.lesson-phase-done__note {
+  max-width: 48ch;
+  color: var(--mut);
+  font-size: 0.8rem;
+  font-weight: 700;
+  line-height: 1.55;
+}
+
+/* Pháo giấy khi hoàn thành phase/level. */
+.lesson-confetti {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.lesson-confetti i {
+  position: absolute;
+  top: 0;
+  left: var(--x);
+  width: 9px;
+  height: 14px;
+  border-radius: 3px;
+  background: hsl(var(--hue) 82% 62%);
+  opacity: 0;
+  animation: lessonConfettiFall var(--fall) cubic-bezier(0.22, 0.61, 0.36, 1) var(--delay) both;
+}
+
+.lesson-confetti i:nth-child(3n) {
+  width: 12px;
+  height: 8px;
+  border-radius: 999px;
+}
+
+.lesson-confetti i:nth-child(4n) {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
 }
 
 .lesson-done h1 {
@@ -674,6 +881,19 @@
   text-align: center;
 }
 
+.lesson-locked-mascot {
+  width: 210px;
+  height: 216px;
+  border-radius: 32px;
+  background:
+    radial-gradient(70% 70% at 50% 22%, rgba(255, 255, 255, 0.7), transparent 74%),
+    var(--sky);
+}
+
+.lesson-locked-mascot .level-mascot {
+  min-height: 0;
+}
+
 .lesson-missing h1 {
   font-size: clamp(1.3rem, 3vw, 1.7rem);
   color: var(--tx);
@@ -700,6 +920,30 @@
   outline: none;
   border-color: var(--pri);
   box-shadow: var(--focus);
+}
+
+@keyframes phasePulse {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.12);
+  }
+}
+
+@keyframes lessonConfettiFall {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, -12vh, 0) rotate(0deg);
+  }
+  10% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translate3d(0, 92vh, 0) rotate(var(--spin));
+  }
 }
 
 @keyframes lessonShake {
@@ -735,10 +979,43 @@
   .lesson__stage {
     position: static;
     order: -1;
-    flex-direction: row;
+    display: grid;
+    grid-template-columns: 150px minmax(0, 1fr);
+    grid-template-areas:
+      'mascot tag'
+      'mascot pips'
+      'speech speech';
     align-items: center;
+    gap: 4px 14px;
     min-height: 0;
-    padding: 6px 10px;
+    padding: 10px 14px;
+  }
+
+  .lesson__stage-head {
+    grid-area: mascot;
+    width: 100%;
+    height: 172px;
+  }
+
+  .lesson__stage-tag {
+    grid-area: tag;
+    align-items: flex-start;
+    text-align: left;
+  }
+
+  .lesson__stage .phase-pips {
+    grid-area: pips;
+    justify-content: flex-start;
+    margin: 0;
+  }
+
+  .lesson__stage .phase-pip {
+    flex: 0 0 auto;
+  }
+
+  .lesson__speech {
+    grid-area: speech;
+    flex: 1;
   }
 
   .lesson__stage .cloud-friends {
@@ -746,10 +1023,6 @@
     width: 210px;
     height: 128px;
     min-height: 0;
-  }
-
-  .lesson__speech {
-    flex: 1;
   }
 }
 
@@ -787,6 +1060,10 @@
     height: 178px;
   }
 
+  .lesson-done__stage--mascot {
+    height: 268px;
+  }
+
   .lesson-done__actions .btn {
     flex: 1 1 auto;
   }
@@ -803,8 +1080,28 @@
   }
 
   .lesson__stage {
-    flex-direction: column;
-    align-items: stretch;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas:
+      'mascot'
+      'tag'
+      'pips'
+      'speech';
+    justify-items: center;
+    gap: 6px;
+  }
+
+  .lesson__stage-head {
+    width: 100%;
+    height: 164px;
+  }
+
+  .lesson__stage-tag {
+    align-items: center;
+    text-align: center;
+  }
+
+  .lesson__stage .phase-pips {
+    justify-content: center;
   }
 
   .lesson__stage .cloud-friends {
@@ -839,8 +1136,14 @@
 
 @media (prefers-reduced-motion: reduce) {
   .lesson-token.is-wrong,
-  .lesson-star.is-filled {
+  .lesson-star.is-filled,
+  .phase-pip.is-current > span,
+  .lesson-confetti i {
     animation: none;
+  }
+
+  .lesson-confetti {
+    display: none;
   }
 
   .lesson__progress i {
@@ -854,12 +1157,16 @@
   }
 
   .lesson__body {
-    grid-template-columns: minmax(0, 1fr) 420px;
+    grid-template-columns: minmax(0, 1fr) 470px;
     gap: 46px;
   }
 
   .lesson__stage {
-    min-height: 380px;
+    min-height: 420px;
+  }
+
+  .lesson__stage-head {
+    height: 378px;
   }
 
   .lesson__stage .cloud-friends {
@@ -873,6 +1180,10 @@
   .lesson-done__stage {
     height: 280px;
   }
+
+  .lesson-done__stage--mascot {
+    height: 420px;
+  }
 }
 
 @media (min-width: 3300px) {
@@ -881,11 +1192,15 @@
   }
 
   .lesson__body {
-    grid-template-columns: minmax(0, 1fr) 500px;
+    grid-template-columns: minmax(0, 1fr) 550px;
   }
 
   .lesson__stage .cloud-friends {
     height: 320px;
+  }
+
+  .lesson__stage-head {
+    height: 438px;
   }
 
   .lesson-done {

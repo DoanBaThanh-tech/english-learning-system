@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { Button } from '../components/ui/Button'
 import { Card } from '../components/ui/Card'
@@ -16,18 +16,24 @@ import {
   TrophyIcon,
 } from '../components/Icons'
 import { CloudBuddy, CLOUD_FRIENDS } from '../components/mascot/CloudBuddy'
-import { CloudFriends, type CloudMood } from '../components/mascot/CloudFriends'
+import { LevelMascot, type LevelMascotMood } from '../components/mascot/LevelMascot'
 import {
   ALL_LEVELS,
   EXERCISE_LABEL,
+  PHASE_META,
+  PHASE_ORDER,
+  exercisesInPhase,
   findLevel,
   levelIndex,
   unitOfLevel,
   type CourseLevel,
   type Exercise,
+  type Phase,
 } from '../lib/curriculum'
+import { mascotForLevel } from '../lib/mascots'
 import {
   isLevelUnlocked,
+  levelPhases,
   useCourseProgress,
 } from '../lib/courseProgress'
 import { ApiError, addWordByLemmaRequest } from '../lib/api'
@@ -73,22 +79,101 @@ export function LessonPage() {
   return <LessonRunner key={level.id} level={level} />
 }
 
+type PhaseResult = {
+  phase: Phase
+  correct: number
+  total: number
+  xp: number
+}
+
+const PHASE_HINT: Record<Phase, string> = {
+  1: 'Đọc kỹ từ rồi chọn nghĩa đúng nhé!',
+  2: 'Nối từ với nghĩa, chậm mà chắc!',
+  3: 'Sắp các từ thành câu hoàn chỉnh nhé!',
+  4: 'Nghe kỹ rồi viết lại thật chính xác nhé!',
+}
+
+function Confetti({ burstKey }: { burstKey: number }) {
+  return (
+    <div className="lesson-confetti" key={burstKey} aria-hidden="true">
+      {Array.from({ length: 22 }, (_, index) => (
+        <i
+          key={index}
+          style={
+            {
+              '--x': `${(index * 37 + 7) % 100}%`,
+              '--delay': `${(index % 7) * 0.08}s`,
+              '--spin': `${(index % 2 === 0 ? 1 : -1) * (160 + index * 13)}deg`,
+              '--hue': `${(index * 47) % 360}`,
+              '--fall': `${0.9 + (index % 5) * 0.14}s`,
+            } as CSSProperties
+          }
+        />
+      ))}
+    </div>
+  )
+}
+
+function PhasePips({
+  completed,
+  active,
+}: {
+  completed: number
+  active: Phase | null
+}) {
+  return (
+    <ol className="phase-pips" aria-label={`${completed} trên 4 phase hoàn thành`}>
+      {PHASE_ORDER.map((item) => {
+        const done = completed >= item
+        const current = active === item
+        return (
+          <li
+            key={item}
+            className={`phase-pip${done ? ' is-done' : ''}${current ? ' is-current' : ''}`}
+            aria-current={current ? 'step' : undefined}
+          >
+            <span>{done ? <CheckIcon size={13} /> : item}</span>
+            <em>{PHASE_META[item].title}</em>
+          </li>
+        )
+      })}
+    </ol>
+  )
+}
+
 function LessonRunner({ level }: { level: CourseLevel }) {
   const { user } = useAuth()
   const { run } = useAuthedApi()
-  const { progress, complete } = useCourseProgress(user?.email)
+  const { progress, complete, completePhase } = useCourseProgress(user?.email)
   const flatIndex = levelIndex(level.id)
   const unlocked = isLevelUnlocked(progress, flatIndex)
   const unit = unitOfLevel(level)
+  const mascot = mascotForLevel(level.id)
+  const baseXpRef = useRef(progress.levels[level.id]?.xp ?? 0)
 
+  const [phase, setPhase] = useState<Phase>(() => {
+    const saved = levelPhases(progress, level.id)
+    return (saved >= 4 ? 1 : saved + 1) as Phase
+  })
+  const [view, setView] = useState<'play' | 'phase' | 'summary'>('play')
   const [index, setIndex] = useState(0)
   const [attempt, setAttempt] = useState(0)
-  const [phase, setPhase] = useState<'play' | 'done'>('play')
   const [hearts, setHearts] = useState(5)
-  const [correctCount, setCorrectCount] = useState(0)
-  const [xp, setXp] = useState(0)
+  const [phaseCorrect, setPhaseCorrect] = useState(0)
+  const [phaseXp, setPhaseXp] = useState(0)
+  const [levelCorrect, setLevelCorrect] = useState(0)
+  const [levelTotal, setLevelTotal] = useState(0)
+  const [levelXp, setLevelXp] = useState(0)
+  const [phaseResult, setPhaseResult] = useState<PhaseResult | null>(null)
+  const [summary, setSummary] = useState<{
+    accuracy: number
+    stars: number
+    xp: number
+    correct: number
+    total: number
+  } | null>(null)
+  const [danceSignal, setDanceSignal] = useState(0)
   const [result, setResult] = useState<{ ok: boolean; answer: string; explain: string } | null>(null)
-  const [summary, setSummary] = useState<{ accuracy: number; stars: number; xp: number } | null>(null)
 
   const [selected, setSelected] = useState<number | null>(null)
   const [text, setText] = useState('')
@@ -101,12 +186,18 @@ function LessonRunner({ level }: { level: CourseLevel }) {
   const [saveNote, setSaveNote] = useState('')
   const finishedRef = useRef(false)
 
-  const exercise: Exercise = level.exercises[index]
-  const total = level.exercises.length
-  const friend = CLOUD_FRIENDS[exercise.friend]
+  const phaseExercises = useMemo(() => exercisesInPhase(level, phase), [level, phase])
+  const total = phaseExercises.length
+  // Luôn có ít nhất một bài mỗi phase theo curriculum; guard bên dưới giữ an toàn khi dữ liệu đổi.
+  const exercise = phaseExercises[Math.min(index, Math.max(total - 1, 0))] as Exercise
+  const friend = CLOUD_FRIENDS[exercise?.friend ?? PHASE_META[phase].friend]
+  const meta = PHASE_META[phase]
 
   const rightOrder = useMemo(
-    () => (exercise.kind === 'match' ? shuffle(exercise.pairs.map((_, position) => position)) : []),
+    () =>
+      exercise?.kind === 'match'
+        ? shuffle(exercise.pairs.map((_, position) => position))
+        : [],
     [exercise],
   )
 
@@ -118,7 +209,7 @@ function LessonRunner({ level }: { level: CourseLevel }) {
     setPickLeft(null)
     setFlash([])
     setOrder([])
-    if (exercise.kind === 'order') {
+    if (exercise?.kind === 'order') {
       const tokens = exercise.tokens.map((textValue, id) => ({ id, text: textValue }))
       setBank(shuffle(tokens))
     } else {
@@ -127,7 +218,7 @@ function LessonRunner({ level }: { level: CourseLevel }) {
   }, [exercise, index, attempt])
 
   useEffect(() => {
-    if (exercise.kind !== 'listen') return
+    if (exercise?.kind !== 'listen') return
     const timer = window.setTimeout(() => speakEnglish(exercise.audio), 320)
     return () => window.clearTimeout(timer)
   }, [exercise])
@@ -143,12 +234,18 @@ function LessonRunner({ level }: { level: CourseLevel }) {
     return (
       <div className="lesson lesson--center">
         <Card className="lesson-missing">
-          <CloudBuddy friend="lumi" size={120} pose="think" />
+          <div className="lesson-locked-mascot">
+            <LevelMascot
+              mascot={mascot.id}
+              mood="think"
+              ariaLabel={`${mascot.name}, linh vật 3D của level ${level.title}`}
+            />
+          </div>
           <Chip tone="line"><LockIcon size={12} /> Level đang khóa</Chip>
           <h1>Học level trước đã nhé!</h1>
           <p>
             {previous
-              ? `Hoàn thành “${previous.title}” để Nimbo mở khóa level này.`
+              ? `Hoàn thành đủ 4 phase của “${previous.title}” để mở khóa level này.`
               : 'Level này chưa mở.'}
           </p>
           <div className="lesson-missing__actions">
@@ -159,6 +256,19 @@ function LessonRunner({ level }: { level: CourseLevel }) {
               </Link>
             ) : null}
           </div>
+        </Card>
+      </div>
+    )
+  }
+
+  if (!exercise) {
+    return (
+      <div className="lesson lesson--center">
+        <Card className="lesson-missing">
+          <CloudBuddy friend="lumi" size={110} pose="sad" />
+          <h1>Phase này chưa có bài</h1>
+          <p>Quay về bản đồ và chọn một level khác nhé.</p>
+          <Link to="/app" className="btn">Về bản đồ</Link>
         </Card>
       </div>
     )
@@ -199,47 +309,92 @@ function LessonRunner({ level }: { level: CourseLevel }) {
     }
 
     if (ok) {
-      setCorrectCount((value) => value + 1)
-      setXp((value) => value + 10)
+      setPhaseCorrect((value) => value + 1)
+      setPhaseXp((value) => value + 10)
     } else {
       loseHeart()
     }
     setResult({ ok, answer, explain: exercise.explain })
   }
 
-  function finish() {
+  const currentFraction = Math.min(1, (index + (result ? 1 : 0)) / Math.max(total, 1))
+  const phaseMeter = view === 'play' ? currentFraction : 1
+  const overallPct = Math.round(
+    ((view === 'summary' ? 4 : phase - 1 + phaseMeter) / 4) * 100,
+  )
+
+  function finishPhase() {
     if (finishedRef.current) return
     finishedRef.current = true
-    const accuracy = total > 0 ? (correctCount / total) * 100 : 0
-    const stars = accuracy >= 90 ? 3 : accuracy >= 70 ? 2 : 1
-    const earned = xp + 10 + (stars === 3 ? 10 : 0)
-    complete(level.id, { stars, accuracy, xp: earned })
-    setSummary({ accuracy: Math.round(accuracy), stars, xp: earned })
-    setPhase('done')
+    const bonus = 15
+    const nextCorrect = levelCorrect + phaseCorrect
+    const nextTotal = levelTotal + total
+    const nextXp = levelXp + phaseXp + bonus
+    const accuracy = nextTotal > 0 ? Math.round((nextCorrect / nextTotal) * 100) : 0
+
+    setLevelCorrect(nextCorrect)
+    setLevelTotal(nextTotal)
+    setLevelXp(nextXp)
+    setDanceSignal((value) => value + 1)
     setResult(null)
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+
+    if (phase < 4) {
+      completePhase(level.id, phase, baseXpRef.current + nextXp)
+      setPhaseResult({ phase, correct: phaseCorrect, total, xp: phaseXp + bonus })
+      setView('phase')
+      return
+    }
+
+    const stars = accuracy >= 90 ? 3 : accuracy >= 70 ? 2 : 1
+    const earned = nextXp + (stars === 3 ? 10 : 0)
+    complete(level.id, { stars, accuracy, xp: baseXpRef.current + earned })
+    setSummary({ accuracy, stars, xp: earned, correct: nextCorrect, total: nextTotal })
+    setView('summary')
   }
 
   function advance() {
     if (index + 1 >= total) {
-      finish()
+      finishPhase()
       return
     }
     setIndex((value) => value + 1)
   }
 
-  function restart() {
-    finishedRef.current = false
-    setAttempt((value) => value + 1)
+  function resetExerciseState() {
     setIndex(0)
+    setAttempt((value) => value + 1)
     setHearts(5)
-    setCorrectCount(0)
-    setXp(0)
-    setPhase('play')
-    setSummary(null)
+    setPhaseCorrect(0)
+    setPhaseXp(0)
     setResult(null)
+    setSelected(null)
+    setText('')
+    setPhaseResult(null)
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
+  function nextPhase() {
+    finishedRef.current = false
+    setPhase((value) => (value < 4 ? ((value + 1) as Phase) : value))
+    setView('play')
     setSaveState('idle')
     setSaveNote('')
-    window.scrollTo({ top: 0, behavior: 'smooth' })
+    resetExerciseState()
+  }
+
+  function restart() {
+    finishedRef.current = false
+    setPhase(1)
+    setView('play')
+    setLevelCorrect(0)
+    setLevelTotal(0)
+    setLevelXp(0)
+    setSummary(null)
+    setSaveState('idle')
+    setSaveNote('')
+    setDanceSignal((value) => value + 1)
+    resetExerciseState()
   }
 
   function tryMatch(rightIndex: number) {
@@ -289,19 +444,31 @@ function LessonRunner({ level }: { level: CourseLevel }) {
     )
   }
 
-  if (phase === 'done' && summary) {
+  if (view === 'summary' && summary) {
     const next = ALL_LEVELS[flatIndex + 1] ?? null
     return (
       <div className="lesson lesson--done">
         <div className="lesson-done">
-          <div className="lesson-done__stage">
-            <CloudFriends mood="cheer" ariaLabel="Nimbo, Lumi và Pip đang reo mừng" />
+          <Confetti burstKey={danceSignal} />
+          <div className="lesson-done__stage lesson-done__stage--mascot">
+            <LevelMascot
+              mascot={mascot.id}
+              mood="cheer"
+              danceSignal={danceSignal}
+              ariaLabel={`${mascot.name} đang nhảy mừng bạn hoàn thành cả 4 phase`}
+            />
           </div>
-          <span className="eyebrow"><TrophyIcon size={14} /> Hoàn thành level</span>
-          <h1>{summary.stars === 3 ? 'Quá đỉnh, Nimbo tự hào về bạn!' : 'Xong level rồi, giỏi lắm!'}</h1>
+          <span className="eyebrow"><TrophyIcon size={14} /> Đủ 4/4 phase</span>
+          <h1>
+            {summary.stars === 3
+              ? 'Quá đỉnh, cả 4 phase đều rực sáng!'
+              : 'Đủ 4 phase rồi, giỏi lắm!'}
+          </h1>
           <p className="lesson-done__sub">
-            {unit?.title} · {level.title}
+            {unit?.title} · {level.title} · Bạn đồng hành {mascot.name}
           </p>
+
+          <PhasePips completed={4} active={null} />
 
           <div className="lesson-stars" aria-label={`${summary.stars} trên 3 sao`}>
             {[0, 1, 2].map((star) => (
@@ -311,7 +478,7 @@ function LessonRunner({ level }: { level: CourseLevel }) {
 
           <div className="lesson-done__metrics">
             <div><strong>{summary.accuracy}%</strong><span>chính xác</span></div>
-            <div><strong>{correctCount}/{total}</strong><span>câu đúng</span></div>
+            <div><strong>{summary.correct}/{summary.total}</strong><span>câu đúng</span></div>
             <div><strong>+{summary.xp}</strong><span>XP</span></div>
           </div>
 
@@ -372,9 +539,56 @@ function LessonRunner({ level }: { level: CourseLevel }) {
     )
   }
 
-  const progressPct = Math.round(((index + (result ? 1 : 0)) / total) * 100)
-  const stageMood: CloudMood = result ? (result.ok ? 'cheer' : 'sad') : 'idle'
+  if (view === 'phase' && phaseResult) {
+    const nextNumber = Math.min(4, phaseResult.phase + 1) as Phase
+    return (
+      <div className="lesson lesson--done">
+        <div className="lesson-done lesson-phase-done">
+          <Confetti burstKey={danceSignal} />
+          <div className="lesson-done__stage lesson-done__stage--mascot">
+            <LevelMascot
+              mascot={mascot.id}
+              mood="cheer"
+              danceSignal={danceSignal}
+              ariaLabel={`${mascot.name} đang nhảy mừng phase ${phaseResult.phase}`}
+            />
+          </div>
+          <span className="eyebrow">
+            <SparkIcon size={14} /> Phase {phaseResult.phase}/4 hoàn thành
+          </span>
+          <h1>{meta.title} xong rồi!</h1>
+          <p className="lesson-done__sub">
+            {mascot.name}: “Một phần vòng tròn xanh đã sáng! Đi tiếp nhé.”
+          </p>
+
+          <PhasePips completed={phaseResult.phase} active={phaseResult.phase} />
+
+          <div className="lesson-done__metrics">
+            <div><strong>{phaseResult.correct}/{phaseResult.total}</strong><span>câu đúng</span></div>
+            <div><strong>+{phaseResult.xp}</strong><span>XP phase</span></div>
+            <div><strong>{phaseResult.phase}/4</strong><span>vòng tròn xanh</span></div>
+          </div>
+
+          <p className="lesson-phase-done__note">
+            {phaseResult.phase < 4
+              ? `Còn ${4 - phaseResult.phase} phase nữa để làm đầy vòng tròn xanh và mở khóa level kế tiếp.`
+              : 'Đủ 4 phase rồi, xem tổng kết nhé!'}
+          </p>
+
+          <div className="lesson-done__actions">
+            <Link to="/app" className="btn btn--sec">Về bản đồ</Link>
+            <Button onClick={nextPhase}>
+              {phaseResult.phase < 4 ? `Sang phase ${nextNumber}` : 'Xem tổng kết'}
+              <ArrowRightIcon size={15} />
+            </Button>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   const buddyPose = result ? (result.ok ? 'cheer' : 'sad') : 'idle'
+  const stageMood: LevelMascotMood = result ? (result.ok ? 'cheer' : 'sad') : 'idle'
 
   return (
     <div className="lesson">
@@ -384,17 +598,33 @@ function LessonRunner({ level }: { level: CourseLevel }) {
         </Link>
         <div className="lesson__progress-wrap">
           <div
-            className="lesson__progress"
+            className="lesson__progress lesson__progress--phases"
             role="progressbar"
             aria-valuemin={0}
             aria-valuemax={100}
-            aria-valuenow={progressPct}
-            aria-label="Tiến độ bài học"
+            aria-valuenow={overallPct}
+            aria-label={`Tiến độ 4 phase, đang ở phase ${phase}`}
           >
-            <i style={{ width: `${progressPct}%` }} />
+            {PHASE_ORDER.map((item) => {
+              const fill =
+                item < phase || view !== 'play'
+                  ? 1
+                  : item === phase
+                    ? phaseMeter
+                    : 0
+              return (
+                <span
+                  key={item}
+                  className={`lesson__phase-seg${fill >= 1 ? ' is-full' : ''}`}
+                >
+                  <i style={{ width: `${fill * 100}%` }} />
+                </span>
+              )
+            })}
           </div>
           <span>
-            {unit ? `Unit ${unit.cefr}` : 'Khóa Nimbus'} · Level {level.title} · Câu {index + 1}/{total}
+            {unit ? `Unit ${unit.cefr}` : 'Khóa Nimbus'} · Level {level.title} · Phase {phase}/4 ·{' '}
+            {meta.title} · Câu {index + 1}/{total}
           </span>
         </div>
         <div className="lesson__hearts" aria-label={`${hearts} trên 5 trái tim`}>
@@ -489,7 +719,7 @@ function LessonRunner({ level }: { level: CourseLevel }) {
               title={result.ok ? 'Chính xác!' : `Chưa đúng · Đáp án: ${result.answer}`}
               action={
                 <Button size="sm" onClick={advance}>
-                  {index + 1 >= total ? 'Xem kết quả' : 'Tiếp tục'}
+                  {index + 1 >= total ? `Xong phase ${phase}` : 'Tiếp tục'}
                   <ArrowRightIcon size={14} />
                 </Button>
               }
@@ -505,15 +735,27 @@ function LessonRunner({ level }: { level: CourseLevel }) {
         </section>
 
         <aside className="lesson__stage">
-          <CloudFriends mood={stageMood} />
+          <div className="lesson__stage-head">
+            <LevelMascot
+              mascot={mascot.id}
+              mood={stageMood}
+              danceSignal={danceSignal}
+              ariaLabel={`${mascot.name}, linh vật 3D của level ${level.title}`}
+            />
+          </div>
+          <div className="lesson__stage-tag">
+            <strong>{mascot.name}</strong>
+            <span>Phase {phase}/4 · {meta.title}</span>
+          </div>
+          <PhasePips completed={phase - 1} active={phase} />
           <div className="lesson__speech">
             <SparkIcon size={14} />
             <p>
               {result
                 ? result.ok
-                  ? `${friend.name} reo lên: “Đúng rồi! Thêm 10 XP nhé.”`
-                  : `${friend.name} bảo đừng lo, xem đáp án rồi đi tiếp.`
-                : `${friend.name}: “Bình tĩnh đọc kỹ rồi chọn nhé!”`}
+                  ? `${mascot.name} nhảy lên: “Đúng rồi! Thêm 10 XP nhé.”`
+                  : `${mascot.name} vỗ vai bạn: “Không sao, xem đáp án rồi đi tiếp.”`
+                : `${mascot.name}: “${PHASE_HINT[phase]}”`}
             </p>
           </div>
         </aside>
