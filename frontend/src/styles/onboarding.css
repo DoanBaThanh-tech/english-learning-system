@@ -1,287 +1,272 @@
 /* ============================================================
-   SkyWorld — Onboarding 3 câu hỏi
-   Nền trời nhạt, thẻ trắng, lựa chọn lớn dễ chạm.
-   Chỉ dùng token màu của tokens.css, không hiệu ứng nền di chuyển.
+   SkyWorld — Onboarding 2 bước (mục đích → trình độ)
+   Nimbo đồng hành, chọn 1 đáp án mỗi bước, hiệu ứng mềm.
    ============================================================ */
 
 .onb {
+  position: relative;
   display: flex;
   flex-direction: column;
   min-height: 100vh;
   min-height: 100svh;
+  overflow-x: clip;
   background:
-    radial-gradient(120% 90% at 85% -10%, rgba(59, 143, 208, 0.16), transparent 60%),
-    radial-gradient(90% 70% at 0% 110%, rgba(246, 215, 122, 0.16), transparent 62%),
+    radial-gradient(120% 90% at 88% -12%, rgba(59, 143, 208, 0.2), transparent 60%),
+    radial-gradient(80% 60% at -4% 106%, rgba(246, 215, 122, 0.18), transparent 62%),
     var(--sky);
   color: var(--tx);
 }
 
+.onb__aurora {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(32% 28% at 26% 18%, rgba(255, 255, 255, 0.45), transparent 70%),
+    radial-gradient(26% 24% at 74% 80%, rgba(28, 176, 246, 0.12), transparent 72%);
+}
+
 .onb__top {
+  position: relative;
+  z-index: 2;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-  padding-top: clamp(16px, 2.4vw, 26px);
+  padding-top: clamp(14px, 2.2vw, 24px);
   padding-bottom: 10px;
 }
 
 .onb__top-right {
   display: flex;
   align-items: center;
-  gap: 14px;
-  min-width: 0;
+  gap: 12px;
 }
 
-.onb__top-right a {
-  font-size: 0.86rem;
+.onb__step-chip {
+  padding: 6px 12px;
+  border: 1px solid var(--ln);
+  border-radius: 999px;
+  background: var(--card);
+  color: var(--pd);
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.onb__login {
+  font-size: 0.82rem;
   font-weight: 700;
   color: var(--mut);
   white-space: nowrap;
 }
 
-.onb__top-right a b {
+.onb__login b {
   color: var(--pd);
 }
 
-.onb__top-right a:hover b {
+.onb__login:hover b {
   text-decoration: underline;
   text-underline-offset: 3px;
 }
 
-/* ---------- Bố cục chính ---------- */
+/* ---------- Bố cục ---------- */
 .onb__main {
+  position: relative;
+  z-index: 1;
   flex: 1;
   display: grid;
-  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
-  gap: clamp(24px, 3.6vw, 52px);
-  align-items: start;
-  padding-top: clamp(16px, 2.6vw, 32px);
+  grid-template-columns: minmax(0, 0.92fr) minmax(0, 1.08fr);
+  gap: clamp(22px, 3vw, 46px);
+  align-items: stretch;
+  padding-top: clamp(14px, 2.4vw, 30px);
   padding-bottom: clamp(28px, 4vw, 48px);
 }
 
-.onb__intro {
-  min-width: 0;
-}
-
-.onb__intro .eyebrow {
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
-  padding: 6px 13px;
-  border: 1px solid var(--ln);
-  border-radius: 999px;
-  background: var(--card);
-  color: var(--pd);
-  font-size: 0.72rem;
-  font-weight: 800;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
-
-.onb__intro h1 {
-  margin-top: 16px;
-  font-size: clamp(2rem, 3.5vw, 3rem);
-  font-weight: 800;
-  line-height: 1.08;
-  color: var(--head);
-}
-
-.onb__intro h1 span {
-  color: var(--pri);
-}
-
-.onb__intro > p {
-  max-width: 46ch;
-  margin-top: 12px;
-  font-size: 0.95rem;
-  line-height: 1.7;
-  color: var(--mut);
-}
-
-/* ---------- Nimbo đồng hành ---------- */
-.onb__buddy {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  margin-top: 22px;
-  padding: 12px 16px 12px 10px;
-  border: 1px solid var(--ln);
-  border-radius: var(--r-card);
-  background: var(--card);
-  box-shadow: var(--shadow-card);
-}
-
-.onb__buddy .nimbo {
-  width: 104px;
-  height: 104px;
-  flex: none;
-  min-height: 0;
-}
-
-.onb__buddy-note {
-  min-width: 0;
-  display: grid;
-  gap: 2px;
-}
-
-.onb__buddy-note strong {
-  font-family: var(--font-title);
-  font-size: 1rem;
-  font-weight: 800;
-  color: var(--head);
-}
-
-.onb__buddy-note span {
-  font-size: 0.84rem;
-  line-height: 1.55;
-  color: var(--mut);
-}
-
-/* ---------- Các bước ---------- */
-.onb__steps {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  margin: 22px 0 0;
-  padding: 0;
-  list-style: none;
-}
-
-.onb__steps li {
+/* ---------- Sân khấu Nimbo ---------- */
+.onb__stage {
   position: relative;
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 11px;
-  padding: 9px 10px 9px 0;
-}
-
-.onb__steps li:not(:last-child)::after {
-  content: '';
-  position: absolute;
-  left: 14px;
-  top: 40px;
-  bottom: -6px;
-  width: 2px;
-  border-radius: 2px;
-  background: var(--ln);
-}
-
-.onb__steps li > span {
-  display: grid;
-  place-items: center;
-  width: 30px;
-  height: 30px;
-  flex: none;
-  border: 2px solid var(--ln);
-  border-radius: 11px;
-  background: var(--card);
-  font-size: 0.78rem;
-  font-weight: 800;
-  color: var(--mut);
-}
-
-.onb__steps li strong {
-  display: block;
-  font-size: 0.92rem;
-  font-weight: 800;
-  color: var(--mut);
-}
-
-.onb__steps li em {
-  display: block;
-  margin-top: 1px;
-  font-size: 0.76rem;
-  font-style: normal;
-  color: var(--mut);
-  opacity: 0.85;
-}
-
-.onb__steps li.is-active > span {
-  border-color: var(--pd);
-  background: var(--pri);
-  color: #ffffff;
-}
-
-.onb__steps li.is-active strong {
-  color: var(--head);
-}
-
-.onb__steps li.is-done > span {
-  border-color: transparent;
-  background: var(--ok-bg);
-  color: var(--ok-tx);
-}
-
-.onb__steps li.is-done strong {
-  color: var(--tx);
-}
-
-/* ---------- Xem trước lộ trình ---------- */
-.onb__preview {
-  margin-top: 22px;
-  padding: 16px 18px;
+  justify-content: center;
+  gap: 10px;
+  min-width: 0;
+  overflow: hidden;
+  padding: clamp(20px, 2.4vw, 32px);
   border: 1px solid var(--ln);
-  border-radius: var(--r-card);
+  border-radius: clamp(26px, 3vw, 36px);
   background: var(--card);
   box-shadow: var(--shadow-card);
 }
 
-.onb__preview-top {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  font-size: 0.7rem;
-  font-weight: 800;
-  letter-spacing: 0.09em;
-  text-transform: uppercase;
-  color: var(--mut);
+.onb__halo {
+  position: absolute;
+  width: min(86%, 430px);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle at 50% 44%,
+    rgba(255, 255, 255, 0.82),
+    color-mix(in srgb, var(--sky) 88%, transparent) 48%,
+    transparent 70%
+  );
 }
 
-.onb__preview-top b {
+.onb__bubble {
+  position: relative;
+  z-index: 3;
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  max-width: 352px;
+  padding: 12px 15px;
+  border: 2px solid var(--ln);
+  border-bottom-width: 4px;
+  border-radius: 18px;
+  background: var(--field);
+  color: var(--head);
+  font-size: 0.86rem;
+  font-weight: 700;
+  line-height: 1.5;
+  box-shadow: var(--shadow-card);
+  animation: onb-bubble-in 0.55s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+.onb__bubble svg {
+  flex: none;
+  margin-top: 2px;
+  color: var(--gold);
+}
+
+.onb__bubble::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: -9px;
+  width: 15px;
+  height: 15px;
+  border-right: 2px solid var(--ln);
+  border-bottom: 2px solid var(--ln);
+  background: var(--field);
+  transform: translateX(-50%) rotate(45deg);
+}
+
+.onb__mascot {
+  position: relative;
+  z-index: 2;
   display: grid;
   place-items: center;
-  min-width: 32px;
-  padding: 2px 8px;
-  border-radius: 8px;
-  background: var(--sky);
-  color: var(--pd);
+  margin-top: 4px;
+}
+
+.onb__mascot .nimbo {
+  max-width: 100%;
+}
+
+.onb__mascot::after {
+  content: '';
+  position: absolute;
+  bottom: 2%;
+  left: 50%;
+  z-index: -1;
+  width: 62%;
+  height: 16px;
+  border-radius: 50%;
+  background: radial-gradient(ellipse, rgba(29, 92, 151, 0.22), transparent 70%);
+  transform: translateX(-50%);
+}
+
+.onb__mascot-name {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  justify-items: center;
+  gap: 1px;
+  text-align: center;
+}
+
+.onb__mascot-name strong {
   font-family: var(--font-title);
-  font-size: 0.8rem;
+  font-size: 1.05rem;
+  color: var(--head);
+}
+
+.onb__mascot-name span {
+  color: var(--mut);
+  font-size: 0.74rem;
+  font-weight: 700;
+}
+
+.onb__preview {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  margin-top: 8px;
+  padding: 14px 16px;
+  border: 1px solid var(--ln);
+  border-radius: 18px;
+  background: var(--sky);
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.onb__preview.is-ready {
+  border-color: color-mix(in srgb, var(--pri) 36%, var(--ln));
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--pri) 10%, transparent);
+}
+
+.onb__preview-head {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--mut);
+  font-size: 0.63rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.onb__preview-head svg {
+  color: var(--gold);
 }
 
 .onb__preview > strong {
   display: block;
-  margin-top: 8px;
+  margin-top: 6px;
   font-family: var(--font-title);
-  font-size: 1.12rem;
-  font-weight: 800;
+  font-size: 1.02rem;
   color: var(--head);
 }
 
 .onb__preview > p {
   margin-top: 3px;
-  font-size: 0.84rem;
-  line-height: 1.55;
   color: var(--mut);
+  font-size: 0.78rem;
+  line-height: 1.5;
 }
 
 .onb__preview-chips {
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
-  margin-top: 10px;
-}
-
-.onb__preview .progress {
-  margin-top: 12px;
+  margin-top: 9px;
 }
 
 /* ---------- Thẻ câu hỏi ---------- */
 .onb__card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
   min-width: 0;
-  padding: clamp(20px, 2.8vw, 32px);
-  border-radius: var(--r-card-lg);
+  padding: clamp(22px, 2.8vw, 38px);
+  border: 1px solid var(--ln);
+  border-radius: clamp(26px, 3vw, 36px);
+  background: var(--card);
+  box-shadow: var(--shadow-card);
+  animation: onb-card-in 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
 .onb__card-top {
@@ -291,49 +276,83 @@
   gap: 10px;
 }
 
-.onb__card-top > span {
-  font-size: 0.78rem;
-  font-weight: 700;
-  color: var(--mut);
-  text-align: right;
+.onb__step-label {
+  color: var(--pri);
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
 }
 
-.onb__card h2 {
-  margin-top: 12px;
-  font-size: clamp(1.35rem, 2vw, 1.7rem);
+.onb__single {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 10px;
+  border: 1px solid var(--ln);
+  border-radius: 999px;
+  background: var(--field);
+  color: var(--mut);
+  font-size: 0.65rem;
   font-weight: 800;
+  white-space: nowrap;
+}
+
+.onb__single svg {
+  color: var(--ok-tx);
+}
+
+.onb__progress {
+  height: 8px;
+  margin-top: 14px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--ln) 55%, transparent);
+}
+
+.onb__progress i {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--pri) 72%, #ffffff),
+    var(--pri)
+  );
+  transition: width 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.onb__card h1 {
+  margin-top: 18px;
   color: var(--head);
+  font-size: clamp(1.5rem, 2.4vw, 2.1rem);
+  line-height: 1.12;
+  letter-spacing: -0.02em;
 }
 
 .onb__lead {
-  margin-top: 6px;
-  max-width: 52ch;
-  font-size: 0.9rem;
-  line-height: 1.6;
+  max-width: 56ch;
+  margin-top: 8px;
   color: var(--mut);
+  font-size: 0.9rem;
+  line-height: 1.65;
 }
 
-/* ---------- Lựa chọn chung ---------- */
+/* ---------- Lựa chọn ---------- */
 .onb__options {
   display: grid;
-  gap: 9px;
-  margin-top: 18px;
-}
-
-.onb__options--source,
-.onb__options--level,
-.onb__options--purpose {
   grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 20px;
 }
 
-.onb-option,
-.onb-level {
+.onb-choice {
   position: relative;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 11px;
   min-width: 0;
-  padding: 11px 38px 11px 12px;
+  padding: 13px 40px 13px 13px;
   border: 2px solid var(--ln);
   border-radius: 16px;
   background: var(--field);
@@ -342,70 +361,72 @@
   text-align: left;
   cursor: pointer;
   transition:
-    border-color 0.16s ease,
-    background 0.16s ease,
-    box-shadow 0.16s ease;
+    border-color 0.2s ease,
+    background 0.2s ease,
+    box-shadow 0.25s ease,
+    transform 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+  animation: onb-choice-in 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation-delay: calc(var(--i, 0) * 34ms);
 }
 
-.onb-option:hover,
-.onb-level:hover {
-  border-color: var(--pri);
+.onb-choice:hover {
+  border-color: color-mix(in srgb, var(--pri) 55%, var(--ln));
+  transform: translateY(-2px);
 }
 
-.onb-option.is-active,
-.onb-level.is-active {
+.onb-choice:active {
+  transform: translateY(0) scale(0.99);
+}
+
+.onb-choice.is-active {
   border-color: var(--pri);
   background: var(--sky);
   box-shadow: var(--focus);
 }
 
-.onb-option__mark {
+.onb-choice__icon {
   display: grid;
   place-items: center;
   width: 36px;
   height: 36px;
   flex: none;
-  border-radius: 11px;
-  background: var(--sky);
+  border-radius: 12px;
+  background: var(--card);
   color: var(--pd);
-  font-family: var(--font-title);
-  font-size: 1rem;
-  font-weight: 800;
+  transition: background 0.2s ease, color 0.2s ease;
 }
 
-.onb-option.is-active .onb-option__mark {
+.onb-choice.is-active .onb-choice__icon {
   background: var(--pri);
   color: #ffffff;
 }
 
-.onb-option__copy {
-  min-width: 0;
+.onb-choice__copy {
   flex: 1;
+  min-width: 0;
 }
 
-.onb-option__copy strong,
-.onb-level__copy strong {
+.onb-choice__copy strong {
   display: block;
-  font-size: 0.88rem;
+  color: var(--tx);
+  font-size: 0.87rem;
   font-weight: 800;
   line-height: 1.35;
-  color: var(--tx);
 }
 
-.onb-option__copy em,
-.onb-level__copy em {
+.onb-choice__copy em {
   display: block;
   margin-top: 2px;
-  font-size: 0.76rem;
+  color: var(--mut);
+  font-size: 0.74rem;
   font-style: normal;
   line-height: 1.45;
-  color: var(--mut);
 }
 
-.onb-option__check {
+.onb-choice__check {
   position: absolute;
-  top: 10px;
-  right: 10px;
+  top: 11px;
+  right: 11px;
   display: grid;
   place-items: center;
   width: 20px;
@@ -414,81 +435,62 @@
   border-radius: 50%;
   background: var(--card);
   color: transparent;
+  transition: background 0.2s ease, border-color 0.2s ease;
 }
 
-.onb-option.is-active .onb-option__check {
+.onb-choice.is-active .onb-choice__check {
   border-color: transparent;
   background: var(--pri);
   color: #ffffff;
 }
 
-/* ---------- Trình độ ---------- */
-.onb-level {
-  align-items: flex-start;
-  padding: 13px 54px 13px 13px;
+/* ---------- Thẻ trình độ ---------- */
+.onb-choice--level {
+  padding: 13px 40px 13px 12px;
 }
 
-.onb-level__code {
+.onb-choice__code {
   display: grid;
   place-items: center;
-  width: 42px;
-  height: 42px;
+  width: 46px;
+  height: 46px;
   flex: none;
-  border-radius: 12px;
-  background: var(--sky);
+  border-radius: 13px;
+  background: var(--card);
   color: var(--pd);
   font-family: var(--font-title);
-  font-size: 1.05rem;
+  font-size: 1.02rem;
   font-weight: 800;
+  transition: background 0.2s ease, color 0.2s ease;
 }
 
-.onb-level.is-active .onb-level__code {
+.onb-choice--level.is-active .onb-choice__code {
   background: var(--pri);
   color: #ffffff;
 }
 
-.onb-level__copy {
-  min-width: 0;
-  flex: 1;
-}
-
-.onb-level .chip {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-}
-
-/* ---------- Gợi ý trọng tâm ---------- */
-.onb__focus {
+.onb-choice__title {
   display: flex;
-  gap: 11px;
-  align-items: flex-start;
-  margin-top: 14px;
-  padding: 12px 14px;
-  border: 1px solid var(--ln);
-  border-radius: 16px;
-  background: var(--ok-bg);
-  color: var(--ok-tx);
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
 }
 
-.onb__focus svg {
-  flex: none;
-  margin-top: 2px;
-}
-
-.onb__focus strong {
-  display: block;
-  font-size: 0.86rem;
+.onb-choice__title i {
+  padding: 2px 7px;
+  border-radius: 999px;
+  background: var(--card);
+  color: var(--mut);
+  font-size: 0.58rem;
+  font-style: normal;
   font-weight: 800;
-  color: var(--ok-tx);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
 }
 
-.onb__focus span {
-  display: block;
-  margin-top: 1px;
-  font-size: 0.78rem;
-  color: var(--ok-tx);
-  opacity: 0.9;
+.onb-choice.is-active .onb-choice__title i {
+  background: color-mix(in srgb, var(--pri) 14%, var(--card));
+  color: var(--pd);
 }
 
 /* ---------- Điều hướng ---------- */
@@ -498,12 +500,12 @@
   justify-content: space-between;
   gap: 10px;
   margin-top: 22px;
-  padding-top: 16px;
-  border-top: 1px solid var(--ln);
+  padding-top: 18px;
+  border-top: 1px dashed var(--ln);
 }
 
 .onb__nav .btn {
-  min-width: 130px;
+  min-width: 132px;
 }
 
 .onb__privacy {
@@ -512,9 +514,9 @@
   justify-content: center;
   gap: 6px;
   margin-top: 12px;
-  font-size: 0.76rem;
-  line-height: 1.45;
   color: var(--mut);
+  font-size: 0.74rem;
+  line-height: 1.45;
   text-align: center;
 }
 
@@ -524,6 +526,8 @@
 
 /* ---------- Footer ---------- */
 .onb__foot {
+  position: relative;
+  z-index: 1;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -531,106 +535,146 @@
   gap: 6px 18px;
   padding-top: 12px;
   padding-bottom: 18px;
-  font-size: 0.76rem;
   color: var(--mut);
+  font-size: 0.74rem;
+}
+
+/* ---------- Animation ---------- */
+@keyframes onb-card-in {
+  from {
+    opacity: 0;
+    transform: translateY(18px) scale(0.985);
+    filter: blur(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+    filter: none;
+  }
+}
+
+@keyframes onb-choice-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes onb-bubble-in {
+  0% {
+    opacity: 0;
+    transform: translateY(8px) scale(0.92);
+  }
+  60% {
+    transform: translateY(-2px) scale(1.02);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 
 /* ---------- Responsive ---------- */
-@media (max-width: 1024px) {
+@media (max-width: 1100px) {
   .onb__main {
     grid-template-columns: minmax(0, 1fr);
-    gap: 22px;
+    gap: 20px;
   }
 
-  .onb__intro h1 {
-    font-size: clamp(1.9rem, 5.4vw, 2.6rem);
+  .onb__stage {
+    display: grid;
+    grid-template-columns: minmax(170px, 240px) minmax(0, 1fr);
+    grid-template-areas:
+      'mascot bubble'
+      'mascot name'
+      'preview preview';
+    align-items: center;
+    justify-items: center;
+    column-gap: 20px;
+    row-gap: 6px;
+    padding: clamp(18px, 3vw, 26px);
   }
 
-  .onb__intro > p {
-    max-width: 62ch;
+  .onb__bubble {
+    grid-area: bubble;
+    justify-self: start;
+    max-width: 100%;
   }
 
-  .onb__steps {
-    flex-direction: row;
-    flex-wrap: wrap;
-    gap: 8px;
-    margin-top: 16px;
-  }
-
-  .onb__steps li {
-    flex: 1 1 170px;
-    padding: 8px 10px;
-    border: 1px solid var(--ln);
-    border-radius: 14px;
-    background: var(--card);
-  }
-
-  .onb__steps li::after {
+  .onb__bubble::after {
     display: none;
+  }
+
+  .onb__mascot {
+    grid-area: mascot;
+  }
+
+  .onb__mascot-name {
+    grid-area: name;
+    justify-self: start;
+    justify-items: start;
+    text-align: left;
   }
 
   .onb__preview {
-    margin-top: 14px;
+    grid-area: preview;
+    margin-top: 10px;
   }
 }
 
-@media (max-width: 640px) {
-  .onb__top {
-    padding-top: 12px;
-  }
-
-  .onb__top-right .chip {
-    display: none;
-  }
-
-  .onb__top-right a {
-    font-size: 0.8rem;
-  }
-
-  .onb__login-hint {
-    display: none;
-  }
-
+@media (max-width: 700px) {
   .onb__main {
-    padding-top: 12px;
+    gap: 16px;
   }
 
-  .onb__intro h1 {
-    font-size: clamp(1.7rem, 7.4vw, 2.2rem);
-  }
-
-  .onb__intro > p {
-    font-size: 0.88rem;
-  }
-
-  .onb__buddy {
-    margin-top: 16px;
-  }
-
-  .onb__buddy .nimbo {
-    width: 84px;
-    height: 84px;
-  }
-
-  .onb__options--source,
-  .onb__options--level,
-  .onb__options--purpose {
+  .onb__stage {
     grid-template-columns: minmax(0, 1fr);
+    grid-template-areas:
+      'bubble'
+      'mascot'
+      'name';
+    padding: 16px 14px 18px;
+  }
+
+  .onb__bubble {
+    justify-self: center;
+  }
+
+  .onb__mascot-name {
+    justify-self: center;
+    justify-items: center;
+    text-align: center;
+  }
+
+  .onb__preview {
+    display: none;
   }
 
   .onb__card {
-    padding: 18px 16px;
+    padding: 20px 16px 16px;
     border-radius: 24px;
   }
 
-  .onb__card h2 {
-    font-size: 1.3rem;
+  .onb__card h1 {
+    font-size: clamp(1.3rem, 5.6vw, 1.6rem);
+  }
+
+  .onb__options {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .onb__single {
+    display: none;
   }
 
   .onb__nav {
     position: sticky;
     bottom: 0;
-    z-index: 2;
+    z-index: 4;
     margin-inline: -16px;
     padding: 12px 16px calc(12px + env(safe-area-inset-bottom));
     background: var(--card);
@@ -638,14 +682,13 @@
     border-radius: 0 0 24px 24px;
   }
 
+  .onb__nav {
+    box-shadow: 0 -14px 26px color-mix(in srgb, var(--bg) 72%, transparent);
+  }
+
   .onb__nav .btn {
     flex: 1;
     min-width: 0;
-  }
-
-  .onb__privacy {
-    font-size: 0.72rem;
-    padding-bottom: 6px;
   }
 
   .onb__foot {
@@ -654,95 +697,121 @@
   }
 }
 
-@media (max-width: 360px) {
-  .onb__intro h1 {
-    font-size: 1.6rem;
+@media (max-width: 420px) {
+  .onb__step-chip {
+    display: none;
   }
 
-  .onb-option,
-  .onb-level {
-    padding: 10px 34px 10px 10px;
+  .onb__login-hint {
+    display: none;
+  }
+
+  .onb__login {
+    font-size: 0.76rem;
+  }
+
+  .onb__bubble {
+    padding: 10px 12px;
+    font-size: 0.8rem;
+  }
+
+  .onb-choice,
+  .onb-choice--level {
+    padding: 11px 36px 11px 10px;
     gap: 9px;
   }
 
-  .onb-option__mark {
+  .onb-choice__icon {
     width: 32px;
     height: 32px;
   }
 
+  .onb-choice__code {
+    width: 40px;
+    height: 40px;
+    font-size: 0.92rem;
+  }
+
+  .onb__nav {
+    gap: 8px;
+  }
+
   .onb__nav .btn {
-    font-size: 0.82rem;
-    padding-inline: 12px;
+    gap: 5px;
+    padding-inline: 8px;
+    font-size: 0.72rem;
+    letter-spacing: 0;
+  }
+}
+
+@media (max-width: 350px) {
+  .onb__nav .btn {
+    font-size: 0.66rem;
+    padding-inline: 6px;
   }
 }
 
 /* ---------- Màn hình lớn ---------- */
 @media (min-width: 1700px) {
   .onb__main {
-    width: min(92vw, 1450px);
+    width: min(92vw, 1480px);
     gap: 60px;
   }
 
-  .onb__intro h1 {
-    font-size: 3.5rem;
-  }
-
-  .onb__intro > p {
-    font-size: 1.05rem;
-  }
-
   .onb__card {
-    padding: 40px;
+    padding: 42px;
   }
 
-  .onb-option__copy strong,
-  .onb-level__copy strong {
+  .onb__card h1 {
+    font-size: 2.25rem;
+  }
+}
+
+@media (min-width: 2400px) {
+  .onb__main {
+    width: min(92vw, 1820px);
+    gap: 76px;
+  }
+
+  .onb__card h1 {
+    font-size: 2.6rem;
+  }
+
+  .onb-choice__copy strong {
     font-size: 1rem;
   }
-}
 
-@media (min-width: 2300px) {
-  .onb__main {
-    width: min(92vw, 1760px);
-  }
-
-  .onb__intro h1 {
-    font-size: 4.1rem;
-  }
-
-  .onb__card h2 {
-    font-size: 2.1rem;
+  .onb-choice__copy em {
+    font-size: 0.86rem;
   }
 }
 
-@media (min-width: 3000px) {
+@media (min-width: 3200px) {
   .onb__main {
-    width: min(92vw, 2140px);
-    gap: 84px;
-  }
-
-  .onb__intro h1 {
-    font-size: 4.9rem;
+    width: min(92vw, 2300px);
+    gap: 96px;
   }
 
   .onb__card {
-    padding: 52px;
-    border-radius: 40px;
+    padding: 56px;
+    border-radius: 44px;
   }
 
-  .onb-option,
-  .onb-level {
-    padding: 16px 46px 16px 18px;
-    border-radius: 20px;
+  .onb__card h1 {
+    font-size: 3rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .onb__card,
+  .onb-choice,
+  .onb__bubble {
+    animation: none;
   }
 
-  .onb-option__copy strong,
-  .onb-level__copy strong {
-    font-size: 1.15rem;
-  }
-
-  .onb-option__copy em,
-  .onb-level__copy em {
-    font-size: 0.95rem;
+  .onb__progress i,
+  .onb-choice,
+  .onb__preview {
+    transition: none;
   }
 }

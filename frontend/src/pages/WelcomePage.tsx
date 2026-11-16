@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react'
+import { useLayoutEffect, type ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 import { SkyLogo } from '../components/SkyLogo'
 import { NimboMascot } from '../components/mascot/NimboMascot'
@@ -32,6 +32,7 @@ const STRIP = [
 
 export function WelcomePage() {
   const { user } = useAuth()
+  useScrollReveal()
 
   return (
     <div className="welcome">
@@ -39,14 +40,11 @@ export function WelcomePage() {
         <div className="sky-shell welcome__header-inner">
           <SkyLogo />
           <div className="welcome__header-actions">
-            <Link to={user ? '/app' : '/login'} className="welcome__link">
-              {user ? 'Vào học' : 'Đăng nhập'}
+            <Link to="/login" className="welcome__link">
+              Đăng nhập
             </Link>
-            <Link
-              to={user ? '/app' : '/onboarding'}
-              className="btn btn--sm"
-            >
-              {user ? 'VÀO HỌC' : 'BẮT ĐẦU'}
+            <Link to="/register" className="btn btn--sm">
+              Đăng ký
             </Link>
           </div>
         </div>
@@ -54,7 +52,7 @@ export function WelcomePage() {
 
       <main>
         <section className="sky-shell welcome__hero">
-          <div className="welcome__stage">
+          <div className="welcome__stage" data-reveal="fade">
             <div className="welcome__nimbo">
               <NimboMascot pose="idle" interactive ariaLabel="Nimbo, chú mây 3D, kéo để xoay" />
             </div>
@@ -77,8 +75,8 @@ export function WelcomePage() {
             </p>
 
             <div className="welcome__actions">
-              <Link to={user ? '/app' : '/onboarding'} className="btn btn--block">
-                {user ? 'VÀO HỌC NGAY' : 'BẮT ĐẦU'}
+              <Link to="/onboarding" className="btn btn--block">
+                VÀO HỌC NGAY
                 <ArrowRightIcon size={18} />
               </Link>
               <Link to={user ? '/app' : '/login'} className="btn btn--sec btn--block">
@@ -174,12 +172,12 @@ export function WelcomePage() {
         </section>
 
         <section className="welcome__cta">
-          <span className="letter l1" aria-hidden="true">A</span>
-          <span className="letter l2" aria-hidden="true">θ</span>
-          <span className="letter l3" aria-hidden="true">ñ</span>
-          <span className="letter l4" aria-hidden="true">B2</span>
-          <span className="letter l5" aria-hidden="true">C1</span>
-          <span className="letter l6" aria-hidden="true">/æ/</span>
+          <span className="letter l1" aria-hidden="true" data-reveal="zoom" data-reveal-delay="60">A</span>
+          <span className="letter l2" aria-hidden="true" data-reveal="zoom" data-reveal-delay="140">θ</span>
+          <span className="letter l3" aria-hidden="true" data-reveal="zoom" data-reveal-delay="220">ñ</span>
+          <span className="letter l4" aria-hidden="true" data-reveal="zoom" data-reveal-delay="300">B2</span>
+          <span className="letter l5" aria-hidden="true" data-reveal="zoom" data-reveal-delay="380">C1</span>
+          <span className="letter l6" aria-hidden="true" data-reveal="zoom" data-reveal-delay="460">/æ/</span>
 
           <div className="sky-shell welcome__cta-inner">
             <span className="welcome__eyebrow">
@@ -189,7 +187,7 @@ export function WelcomePage() {
             <h2>học miễn phí cùng Nimbo ngay hôm nay</h2>
             <p>Chỉ vài phút mỗi ngày. Không cần thẻ, không quảng cáo.</p>
             <Link to="/onboarding" className="btn">
-              BẮT ĐẦU
+              VÀO HỌC NGAY
               <ArrowRightIcon size={18} />
             </Link>
           </div>
@@ -273,7 +271,7 @@ function Feature({ title, description, points, art, flip = false }: FeatureProps
           ))}
         </div>
       </div>
-      <div className="feature__art">{art}</div>
+      <div className="feature__art" data-reveal="zoom" data-reveal-delay="90">{art}</div>
     </article>
   )
 }
@@ -292,13 +290,13 @@ function PhoneArt() {
           She deposited cash at the <b>bank</b>.
         </p>
         <div className="phone__options">
-          <div className="phone__option is-right">
+          <div className="phone__option is-right" data-reveal="up" data-reveal-delay="80">
             nộp tiền mặt tại ngân hàng
             <CheckIcon size={14} />
           </div>
-          <div className="phone__option">bờ sông <span /></div>
-          <div className="phone__option">bờ biển <span /></div>
-          <div className="phone__option">kho hàng <span /></div>
+          <div className="phone__option" data-reveal="up" data-reveal-delay="130">bờ sông <span /></div>
+          <div className="phone__option" data-reveal="up" data-reveal-delay="180">bờ biển <span /></div>
+          <div className="phone__option" data-reveal="up" data-reveal-delay="230">kho hàng <span /></div>
         </div>
       </div>
     </div>
@@ -408,19 +406,19 @@ function PathArt() {
   return (
     <div className="path-art" aria-label="Minh họa đường học với các bài tròn nối nhau">
       <div className="path-line" aria-hidden="true" />
-      <div className="path-node is-done" style={{ left: '6%', top: '2%' }}>
+      <div className="path-node is-done" style={{ left: '6%', top: '2%' }} data-reveal="zoom" data-reveal-delay="60">
         <CheckIcon size={18} />
       </div>
-      <div className="path-node" style={{ left: '30%', top: '18%' }}>
+      <div className="path-node" style={{ left: '30%', top: '18%' }} data-reveal="zoom" data-reveal-delay="130">
         <SearchIcon size={18} />
       </div>
-      <div className="path-node" style={{ right: '10%', top: '40%' }}>
+      <div className="path-node" style={{ right: '10%', top: '40%' }} data-reveal="zoom" data-reveal-delay="200">
         <BookmarkIcon size={18} />
       </div>
-      <div className="path-node" style={{ left: '24%', top: '62%' }}>
+      <div className="path-node" style={{ left: '24%', top: '62%' }} data-reveal="zoom" data-reveal-delay="270">
         <SpeakerIcon size={18} />
       </div>
-      <div className="path-node is-locked" style={{ right: '12%', top: '78%' }}>
+      <div className="path-node is-locked" style={{ right: '12%', top: '78%' }} data-reveal="zoom" data-reveal-delay="340">
         <ClockIcon size={18} />
       </div>
       <span className="chip chip--line" style={{ position: 'absolute', left: 0, bottom: 0 }}>
@@ -434,4 +432,44 @@ function PathArt() {
       </span>
     </div>
   )
+}
+
+/* Reveal khi cuộn: nhẹ, chỉ dành cho hình ảnh/icon; chạy lại mỗi lần
+   khối vào khung nhìn (kể cả cuộn lên rồi xuống). Ẩn ban đầu chỉ bật
+   sau khi JS sẵn sàng để không mất nội dung khi lỗi. */
+function useScrollReveal() {
+  useLayoutEffect(() => {
+    const root = document.querySelector<HTMLElement>('.welcome')
+    if (!root) return
+    const nodes = Array.from(root.querySelectorAll<HTMLElement>('[data-reveal]'))
+    if (!nodes.length) return
+
+    root.setAttribute('data-reveal-ready', '')
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      nodes.forEach((node) => node.classList.add('is-revealed'))
+      return
+    }
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          const node = entry.target as HTMLElement
+          if (entry.isIntersecting && entry.intersectionRatio >= 0.14) {
+            if (node.classList.contains('is-revealed')) continue
+            const delay = Number(node.dataset.revealDelay ?? 0)
+            node.style.transitionDelay = delay > 0 ? `${delay}ms` : ''
+            node.classList.add('is-revealed')
+          } else if (!entry.isIntersecting && node.classList.contains('is-revealed')) {
+            // Khi khối đã ra khỏi khung nhìn, gỡ trạng thái để lần cuộn sau chạy lại.
+            node.style.transitionDelay = '0ms'
+            node.classList.remove('is-revealed')
+          }
+        }
+      },
+      { threshold: [0, 0.14, 0.4], rootMargin: '0px 0px -6% 0px' },
+    )
+    nodes.forEach((node) => observer.observe(node))
+
+    return () => observer.disconnect()
+  }, [])
 }

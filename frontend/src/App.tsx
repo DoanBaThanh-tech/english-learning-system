@@ -53,14 +53,9 @@ export default function App() {
         <Route path="/" element={<WelcomePage />} />
         <Route path="/welcome" element={<Navigate to="/" replace />} />
 
-        <Route
-          path="/onboarding"
-          element={
-            <GuestOnly>
-              <OnboardingPage />
-            </GuestOnly>
-          }
-        />
+        {/* Mở cho cả người đã đăng nhập: nút "Vào học ngay" luôn dẫn tới 2 bước
+            thăm hỏi; xong bước 2 sẽ về /app nếu đã có phiên. */}
+        <Route path="/onboarding" element={<OnboardingPage />} />
         <Route
           path="/register"
           element={

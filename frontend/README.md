@@ -40,8 +40,8 @@ VITE_API_URL=http://localhost:5041
 
 | Route | Trang |
 |---|---|
-| `/` | Welcome: hero Nimbo, 7 tính năng, 5 khối giới thiệu, CTA, footer |
-| `/onboarding` | 3 câu hỏi cá nhân hóa: kênh biết tới, trình độ A1–C2, mục tiêu |
+| `/` | Welcome: hero Nimbo, 7 tính năng, reveal khi cuộn, header Đăng nhập/Đăng ký, CTA |
+| `/onboarding` | 2 bước: mục đích học → trình độ A1–C2, mỗi bước chọn 1 đáp án, Nimbo cổ vũ |
 | `/register` | Tạo tài khoản, điền sẵn trình độ/mục tiêu từ onboarding |
 | `/login` | Đăng nhập, điền sẵn email sau khi đăng ký |
 | `/app` | Học: bản đồ khóa Nimbus 12 level, vòng 4 phase, XP, sao, lộ trình cá nhân |
@@ -63,6 +63,8 @@ VITE_API_URL=http://localhost:5041
 - `src/styles/tokens.css`: token màu sáng/tối, font **Baloo 2** (tiêu đề) + **Nunito** (nội dung), reset, focus ring, reduced motion.
 - `src/styles/ui.css`: `.btn` khối nổi (viền 2px, đáy 5px, chữ hoa, active nhấn xuống), `.card`, form, tab, progress, chip, modal, feedback, skeleton.
 - Mỗi trang có CSS riêng trong `src/styles/`.
+- Welcome dùng `useScrollReveal` + `IntersectionObserver`: chỉ **hình minh họa/icon** (thẻ điện thoại, flashcard, sóng phát âm, chuỗi ngày, path node, chữ cái CTA) mới reveal — nhẹ, có stagger; khi khối ra khỏi khung nhìn thì trạng thái được gỡ để **cuộn lên rồi xuống lại vẫn phát lại**. Nimbo có hiệu ứng “mây trôi vào” riêng (trượt lên, mờ dần, scale rất nhẹ, không nảy). Tất cả tôn trọng `prefers-reduced-motion` và chỉ bật sau khi JS sẵn sàng.
+- Onboarding mới: 2 trang thăm hỏi (mục đích, trình độ), mỗi trang một câu hỏi chọn 1 đáp án; Nimbo phản hồi bằng câu khen ngẫu nhiên mỗi lần chọn, kèm speech bubble và tư thế cheer.
 - Dark mode theo `prefers-color-scheme` và `data-theme="dark"`; chữ dùng token nên đổi màu an toàn.
 - Responsive từ 320px đến TV 4K; app dùng sidebar trái + cột giữa tối đa 760px + rail phải trên desktop, thanh tab dưới trên mobile.
 
@@ -111,6 +113,7 @@ Database mặc định trắng: không có tài khoản demo, không seed từ v
 - 12 linh vật 3D đều dựng được trong cùng gallery kiểm thử, không canvas trắng; mỗi bạn có màu lông, tai/đuôi/cánh và phụ kiện khác nhau. Ảnh chụp cách nhau cho thấy nhân vật thở/đảo mắt/đổi tư thế ngẫu nhiên liên tục, không còn phụ thuộc mốc 10 giây. Khung hình mascot đã tăng: stage chơi 284px, màn chúc mừng 330px, thumbnail bản đồ 68px, hero 158px; camera gần hơn nên nhân vật chiếm phần lớn khung.
 - Animation tính theo delta-time, envelope `sin²` và pha chuyển động liên tục; chớp mắt, đảo mắt, tai, đuôi, cánh đều dùng hàm sin nên không có cú giật khi bắt đầu/kết thúc động tác.
 - Kiểm tra độ nét: phóng trình duyệt 200% và chụp cận mascot, canvas tự tăng pixel ratio theo `devicePixelRatio` (cap 2,6 cho full, 1,9 cho thumbnail), silhouette cầu/tròn không lộ cạnh đa giác.
+- Welcome + onboarding: header khách hiện **Đăng nhập** / **Đăng ký**; reveal khi cuộn chỉ áp dụng cho hình/icon và **phát lại** khi cuộn ra rồi quay lại (kiểm tra `is-revealed`: 1 lúc đầu → 7 khi cuộn xuống → stage bật lại khi quay lên); Nimbo trôi vào mềm khi trang mở. Luồng **Vào học ngay** → bước 1 mục đích → bước 2 trình độ → `/register` đã chạy thật; chọn đáp án đổi bubble khen ngẫu nhiên và Nimbo cheer; form đăng ký điền sẵn đúng mục đích/trình độ/mục tiêu ngày. Đã đo 320 / 390 / 1440 / 2560 px, light + dark, không tràn ngang (`scrollWidth` = viewport).
 - Duyệt giao diện 320 / 390 / 1366 / 1440 / 1536 / 3840 px, light + dark: `scrollWidth` bằng đúng chiều rộng khung nhìn (không tràn ngang). Rail phải tự ẩn dưới 1460px; node bản đồ thu nhỏ và giảm offset dưới 700px để không bị cắt. Màn chơi dùng đúng 1 canvas 3D; bản đồ chỉ dựng canvas cho linh vật gần khung nhìn (4–6 context), không lỗi console. Bản đồ hiển thị vòng xanh đầy cho level đã xong và nửa vòng cho level đang học.
 
 > Ghi chú: nếu API chưa cấu hình nhà cung cấp AI, trang Trò chuyện dùng phản hồi mẫu và hiển thị rõ trạng thái ngoại tuyến. Cloudinary chỉ nên dùng **unsigned preset**; không commit `.env` hoặc file chứa secret.
